@@ -1,14 +1,20 @@
 package com.uai.BuildLand.controllers;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.uai.BuildLand.models.Distribuidora;
 import com.uai.BuildLand.repositories.DistribuidoraRepository;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
+import java.util.Objects;
 
 /**
  * Controlador REST para manejar las operaciones CRUD de distribuidoras
@@ -22,131 +28,120 @@ public class DistribuidoraController {
     public DistribuidoraController(DistribuidoraRepository distribuidoraRepository) {
         this.distribuidoraRepository = distribuidoraRepository;
     }
-    
-    /**
-     * Obtiene todas las distribuidoras
-     * @return Lista de distribuidoras
-     */
-    // @GetMapping
-    // public ResponseEntity<List<Distribuidora>> obtenerTodas() {
-    //     List<Distribuidora> distribuidoras = distribuidoraRepository.obtenerTodas();
-    //     return ResponseEntity.ok(distribuidoras);
-    // }
-    
+
     /**
      * Obtiene una distribuidora por ID (CUIT)
      * @param cuit CUIT de la distribuidora
      * @return Distribuidora encontrada o 404 si no existe
      */
-    // @GetMapping("/{cuit}")
-    // public ResponseEntity<Distribuidora> obtenerPorId(@PathVariable String cuit) {
-    //     Optional<Distribuidora> distribuidora = distribuidoraRepository.findByIdIgnoreCase(cuit);
+    @GetMapping("/{cuit}")
+    public ResponseEntity<Distribuidora> obtenerPorId(@PathVariable String cuit) {
+        String nonNullCuit = Objects.requireNonNull(cuit, "cuit must not be null");
+        Optional<Distribuidora> distribuidora = distribuidoraRepository.findById(nonNullCuit);
+        if (distribuidora.isPresent()) {
+            return ResponseEntity.ok(distribuidora.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Crea una nueva distribuidora
+     * @param distribuidora Distribuidora a crear
+     * @param ucb UriComponentsBuilder para construir la URI de la respuesta
+     * @return Distribuidora creada con status 201
+     */
+    @PostMapping
+    public ResponseEntity<Distribuidora> crear(@RequestBody Distribuidora distribuidora, UriComponentsBuilder ucb) {
         
-    //     if (distribuidora.isPresent()) {
-    //         return ResponseEntity.ok(distribuidora.get());
-    //     } else {
-    //         return ResponseEntity.notFound().build();
-    //     }
-    // }
-    
-    // /**
-    //  * Crea una nueva distribuidora
-    //  * @param distribuidora Distribuidora a crear
-    //  * @return Distribuidora creada con status 201
-    //  */
-    // @PostMapping
-    // public ResponseEntity<Distribuidora> crear(@RequestBody Distribuidora distribuidora) {
-    //     try {            
-    //         // Validaciones básicas
-    //         // if (distribuidora.GetNombre() == null || distribuidora.GetNombre().trim().isEmpty()) {
-    //         //     System.out.println("Error: Nombre vacío");
-    //         //     return ResponseEntity.badRequest().build();
-    //         // }
-            
-    //         // if (distribuidora.GetCuit() == null || distribuidora.GetCuit().trim().isEmpty()) {
-    //         //     System.out.println("Error: CUIT vacío");
-    //         //     return ResponseEntity.badRequest().build();
-    //         // }
+        Optional<Distribuidora> distrib = Optional.ofNullable(distribuidora);
 
-    //         // if (distribuidora.GetDescripcion() != null && 
-    //         // !distribuidora.GetDescripcion().trim().isEmpty() && 
-    //         // distribuidora.GetDescripcion().length() > 120) {
-    //         // throw new IllegalArgumentException("La descripción no puede exceder 120 caracteres");
-    //         // }
+        if (distrib.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
 
-    //         // // Validar correo electrónico (solo si no es null y no está vacío)
-    //         // if (distribuidora.GetCorreoElectronico() != null && 
-    //         //     !distribuidora.GetCorreoElectronico().trim().isEmpty() && 
-    //         //     distribuidora.GetCorreoElectronico().length() > 100) {
-    //         //     throw new IllegalArgumentException("El correo electrónico no puede exceder 100 caracteres");
-    //         // }
+        if (distribuidora.GetCuit() == null || distribuidora.GetCuit().trim().isEmpty() || distribuidora.GetCuit().length() != 11) {
+            return ResponseEntity.badRequest().build();
+        }
 
-    //         // // Validar código postal (solo si no es null y no está vacío)
-    //         // if (distribuidora.GetCodigoPostal() != null && 
-    //         //     !distribuidora.GetCodigoPostal().trim().isEmpty()) {
-    //         //     throw new IllegalArgumentException("El código postal debe tener exactamente 4 dígitos");
-    //         // }
-            
-    //         Distribuidora nuevaDistribuidora = distribuidoraService.crear(distribuidora);
-    //         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaDistribuidora);
-            
-    //     } catch (IllegalArgumentException e) {
-    //         System.out.println("Error de validación: " + e.getMessage());
-    //         return ResponseEntity.badRequest().build();
-    //     } catch (Exception e) {
-    //         System.out.println("Error interno: " + e.getMessage());
-    //         e.printStackTrace();
-    //         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    //     }
-    // }
-    
-    // /**
-    //  * Actualiza una distribuidora existente
-    //  * @param cuit CUIT de la distribuidora a actualizar
-    //  * @param distribuidora Datos actualizados
-    //  * @return Distribuidora actualizada o 404 si no existe
-    //  */
-    // @PutMapping("/{cuit}")
-    // public ResponseEntity<Distribuidora> actualizar(@PathVariable String cuit, @RequestBody Distribuidora distribuidora) {
-    //     try {
-    //         System.out.println("Actualizando distribuidora con CUIT: " + distribuidora.toString());
-    //         Optional<Distribuidora> distribuidoraActualizada = distribuidoraService.actualizar(cuit, distribuidora);
-            
-    //         if (distribuidoraActualizada.isPresent()) {
-    //             return ResponseEntity.ok(distribuidoraActualizada.get());
-    //         } else {
-    //             return ResponseEntity.notFound().build();
-    //         }
-            
-    //     } catch (Exception e) {
-    //         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    //     }
-    // }
-    
-    // /**
-    //  * Elimina una distribuidora por CUIT
-    //  * @param cuit CUIT de la distribuidora a eliminar
-    //  * @return 204 si se eliminó correctamente, 404 si no existía
-    //  */
-    // @DeleteMapping("/{cuit}")
-    // public ResponseEntity<Void> eliminar(@PathVariable String cuit) {
-    //     boolean eliminada = distribuidoraService.eliminar(cuit);
-        
-    //     if (eliminada) {
-    //         return ResponseEntity.noContent().build();
-    //     } else {
-    //         return ResponseEntity.notFound().build();
-    //     }
-    // }
-    
-    // /**
-    //  * Busca distribuidoras por nombre
-    //  * @param nombre Texto a buscar en el nombre
-    //  * @return Lista de distribuidoras que contienen el texto
-    //  */
-    // @GetMapping("/buscar")
-    // public ResponseEntity<List<Distribuidora>> buscarPorNombre(@RequestParam String nombre) {
-    //     List<Distribuidora> distribuidoras = distribuidoraService.buscarPorNombre(nombre);
-    //     return ResponseEntity.ok(distribuidoras);
-    // }
+        if (distribuidora.GetNombre() == null || distribuidora.GetNombre().trim().isEmpty() || distribuidora.GetNombre().length() > 100) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (distribuidora.GetCiudad() == null || distribuidora.GetCiudad().trim().isEmpty() || distribuidora.GetCiudad().length() > 100) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (distribuidora.GetDireccion() == null || distribuidora.GetDireccion().trim().isEmpty() || distribuidora.GetDireccion().length() > 200) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (distribuidora.GetCodigoPostal() == null || distribuidora.GetCodigoPostal().trim().isEmpty() || distribuidora.GetCodigoPostal().length() > 10) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (distribuidora.GetNumeroTelefono() == null || distribuidora.GetNumeroTelefono().trim().isEmpty() || distribuidora.GetNumeroTelefono().length() > 20) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (distribuidora.GetDescripcion() != null && !distribuidora.GetDescripcion().trim().isEmpty() && distribuidora.GetDescripcion().length() > 255) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Distribuidora distribuidoraGuardada = distribuidoraRepository.save(distribuidora);
+
+        URI uri = ucb.path("/distribuidoras/{cuit}").buildAndExpand(distribuidoraGuardada.GetCuit()).toUri();
+        return ResponseEntity.created(uri).body(distribuidoraGuardada);
+    }
+
+    /**
+     * Actualiza una distribuidora existente
+     * @param distribuidora Datos actualizados
+     * @return Distribuidora actualizada o 404 si no existe
+     */
+    @PatchMapping("/{cuit}")
+    public ResponseEntity<Distribuidora> actualizar(@RequestBody Distribuidora distribuidora) {
+        String nonNullCuit = Objects.requireNonNull(distribuidora.GetCuit(), "cuit must not be null");
+        Optional<Distribuidora> distribuidoraDesactualizada = distribuidoraRepository.findById(nonNullCuit);
+        if (distribuidoraDesactualizada.isPresent()) {
+            distribuidoraRepository.save(distribuidora);
+            return ResponseEntity.ok(distribuidora);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Elimina una distribuidora por CUIT
+     * @param cuit CUIT de la distribuidora a eliminar
+     * @return 204 si se eliminó correctamente, 404 si no existía
+     */
+    @DeleteMapping("/{cuit}")
+    public ResponseEntity<Void> eliminar(@PathVariable String cuit) {
+        // Ensure cuit is non-null for repositories that expect @NonNull parameters
+        String nonNullCuit = Objects.requireNonNull(cuit, "cuit must not be null");
+
+        boolean distribuidoraExiste = distribuidoraRepository.existsById(nonNullCuit);
+
+        if (distribuidoraExiste) {
+            distribuidoraRepository.deleteById(nonNullCuit);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Lista todas las distribuidoras con paginación
+     * @param pageable Parámetros de paginación y ordenamiento
+     * @return Lista de distribuidoras
+     */
+    @GetMapping("/enlistar")
+    public ResponseEntity<List<Distribuidora>> enlistar(Pageable pageable) {
+        Page<Distribuidora> distribuidoras = distribuidoraRepository.findAll(PageRequest.of(
+            pageable.getPageNumber(),
+            pageable.getPageSize(),
+            pageable.getSortOr(Sort.by(Sort.Direction.ASC, "nombre"))));
+        return ResponseEntity.ok(distribuidoras.getContent());
+    }
 }

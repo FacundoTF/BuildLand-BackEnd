@@ -28,7 +28,6 @@ public class PersonaFisicaController {
     public PersonaFisicaController(PersonaFisicaRepository personaFisicaRepository) {
         this.personaFisicaRepository = personaFisicaRepository;
     }
-    
         
     /**
      * Obtiene una persona física por ID (CUIT)

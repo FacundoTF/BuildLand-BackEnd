@@ -1,10 +1,11 @@
 package com.uai.BuildLand.repositories;
 
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
 import com.uai.BuildLand.models.Distribuidora;
 
-public interface DistribuidoraRepository extends CrudRepository<Distribuidora, String> {
+public interface DistribuidoraRepository extends CrudRepository<Distribuidora, String>, PagingAndSortingRepository<Distribuidora, String> {
     // /**
     //  * Busca distribuidoras por nombre (case insensitive)
     //  * @param nombre Nombre a buscar

@@ -1,18 +1,34 @@
 package com.uai.BuildLand.models;
 
-import com.uai.BuildLand.models.Usuario;
+import jakarta.persistence.*;
 
 /**
  * Entidad que representa un empleado en el sistema BuildLand
  */
+@Entity
+@Table(name = "empleados")
 public class Empleado {
-    private Long id_usuario;
+    @OneToOne
+    @JoinColumn(name = "id_usuario")
     private Usuario usuario;
+    
+    @Id
+    @Column(name = "cuit", length = 11)
     private String cuit;
+    
+    @Column(nullable = false, length = 100)
     private String nombre;
+    
+    @Column(name = "numero_telefono", length = 20)
     private String numeroTelefono;
+    
+    @Column(length = 200)
     private String direccion;
+    
+    @Column(name = "codigo_postal", length = 10)
     private String codigoPostal;
+    
+    @Column(length = 100)
     private String ciudad;
 
     // Constructor por defecto
@@ -30,12 +46,6 @@ public class Empleado {
         this.ciudad = ciudad;
     }
 
-    public Long getIdUsuario() {
-        return id_usuario;
-    }
-    public void setIdUsuario(Long id_usuario) {
-        this.id_usuario = id_usuario;
-    }
     public Usuario getUsuario() {
         return usuario;
     }
@@ -88,8 +98,7 @@ public class Empleado {
    @Override
     public String toString() {
         return "Empleado{" +
-                "id_usuario=" + id_usuario +
-                ", cuit='" + cuit + '\'' +
+                "cuit='" + cuit + '\'' +
                 ", nombre='" + nombre + '\'' +
                 ", numeroTelefono='" + numeroTelefono + '\'' +
                 ", direccion='" + direccion + '\'' +

@@ -1,0 +1,126 @@
+package com.uai.BuildLand.controllers;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import com.uai.BuildLand.models.Grupo;
+import com.uai.BuildLand.repositories.GrupoRepository;
+
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
+import java.util.Objects;
+
+/**
+ * Controlador REST para manejar las operaciones CRUD de grupos
+ */
+@RestController
+@RequestMapping("/grupos")
+@CrossOrigin(origins = "*")
+public class GrupoController {
+    private final GrupoRepository grupoRepository;
+
+    public GrupoController(GrupoRepository grupoRepository) {
+        this.grupoRepository = grupoRepository;
+    }
+
+    /**
+     * Obtiene un grupo por ID
+     * @param id ID del grupo
+     * @return Grupo encontrado o 404 si no existe
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<Grupo> obtenerPorId(@PathVariable Long id) {
+        Long nonNullId = Objects.requireNonNull(id, "id must not be null");
+        Optional<Grupo> grupo = grupoRepository.findById(nonNullId);
+        if (grupo.isPresent()) {
+            return ResponseEntity.ok(grupo.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Crea un nuevo grupo
+     * @param grupo Grupo a crear
+     * @param ucb UriComponentsBuilder para construir la URI de la respuesta
+     * @return Grupo creado con status 201
+     */
+    @PostMapping
+    public ResponseEntity<Grupo> crear(@RequestBody Grupo grupo, UriComponentsBuilder ucb) {
+        
+        Optional<Grupo> grp = Optional.ofNullable(grupo);
+
+        if (grp.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (grupo.getNombre() == null || grupo.getNombre().trim().isEmpty() || grupo.getNombre().length() > 100) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (grupo.getDescripcion() != null && grupo.getDescripcion().length() > 255) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Grupo grupoGuardado = grupoRepository.save(grupo);
+
+        URI uri = ucb.path("/grupos/{id}").buildAndExpand(grupoGuardado.getId()).toUri();
+        return ResponseEntity.created(uri).body(grupoGuardado);
+    }
+
+    /**
+     * Actualiza un grupo existente
+     * @param grupo Datos actualizados
+     * @return Grupo actualizado o 404 si no existe
+     */
+    @PatchMapping("/{id}")
+    public ResponseEntity<Grupo> actualizar(@RequestBody Grupo grupo) {
+        Long nonNullId = Objects.requireNonNull(grupo.getId(), "id must not be null");
+        Optional<Grupo> grupoDesactualizado = grupoRepository.findById(nonNullId);
+        if (grupoDesactualizado.isPresent()) {
+            grupoRepository.save(grupo);
+            return ResponseEntity.ok(grupo);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Elimina un grupo por ID
+     * @param id ID del grupo a eliminar
+     * @return 204 si se eliminó correctamente, 404 si no existía
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        Long nonNullId = Objects.requireNonNull(id, "id must not be null");
+
+        boolean grupoExiste = grupoRepository.existsById(nonNullId);
+
+        if (grupoExiste) {
+            grupoRepository.deleteById(nonNullId);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Lista todos los grupos con paginación
+     * @param pageable Parámetros de paginación y ordenamiento
+     * @return Lista de grupos
+     */
+    @GetMapping("/enlistar")
+    public ResponseEntity<List<Grupo>> enlistar(Pageable pageable) {
+        Page<Grupo> grupos = grupoRepository.findAll(PageRequest.of(
+            pageable.getPageNumber(),
+            pageable.getPageSize(),
+            pageable.getSortOr(Sort.by(Sort.Direction.ASC, "nombre"))));
+        return ResponseEntity.ok(grupos.getContent());
+    }
+}
