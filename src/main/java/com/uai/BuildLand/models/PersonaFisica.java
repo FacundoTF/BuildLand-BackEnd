@@ -1,32 +1,41 @@
 package com.uai.BuildLand.models;
 
-/**
- * Entidad que representa una persona física en el sistema BuildLand
- */
-public class PersonaFisica {
-    private Long id_usuario;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "personas_fisicas")
+public class PersonaFisica {
+    @OneToOne
+    @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 
+    @Id
+    @Column(name = "cuit", length = 11)
     private String cuit;
 
+    @Column(nullable = false, length = 100)
     private String nombre;
 
+    @Column(name = "numero_telefono", length = 20)
     private String numeroTelefono;
 
+    @Column(length = 200)
     private String direccion;
 
+    @Column(name = "codigo_postal", length = 10)
     private String codigoPostal;
 
+    @Column(length = 100)
     private String ciudad;
 
-    /**
-     * Constructor por defecto.
-     */
     public PersonaFisica() {
     }
 
-    // Constructor con parámetros
     public PersonaFisica(Usuario usuario, String cuit, String nombre, String numeroTelefono, String direccion, String codigoPostal, String ciudad) {
         this.usuario = usuario;
         this.cuit = cuit;
@@ -38,14 +47,6 @@ public class PersonaFisica {
     }
 
     // Getters y Setters
-    public Long getIdUsuario() {
-        return id_usuario;
-    }
-
-    public void setIdUsuario(Long id_usuario) {
-        this.id_usuario = id_usuario;
-    }
-
     public Usuario getUsuario() {
         return usuario;
     }
@@ -105,7 +106,6 @@ public class PersonaFisica {
     @Override
     public String toString() {
         return "PersonaFisica{" +
-                "id_usuario=" + id_usuario +
                 ", usuario=" + (usuario != null ? usuario.getId() : "null") +
                 ", cuit='" + cuit + '\'' +
                 ", nombre='" + nombre + '\'' +

@@ -33,7 +33,6 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "distribuidoras")
 public class Distribuidora {
-    
     @OneToOne
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;
@@ -60,11 +59,9 @@ public class Distribuidora {
     @Column(length = 100)
     private String ciudad;
 
-    // Constructor por defecto
     public Distribuidora() {
     }
 
-    // Constructor con parámetros
     public Distribuidora(Usuario usuario, String cuit, String nombre, String direccion, String numeroTelefono, String descripcion, String codigoPostal, String ciudad) {
         this.usuario = usuario;
         this.id = cuit;
