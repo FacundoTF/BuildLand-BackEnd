@@ -1,5 +1,6 @@
 package com.uai.BuildLand.models;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -10,7 +11,7 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "personas_fisicas")
 public class PersonaFisica {
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 
@@ -24,9 +25,6 @@ public class PersonaFisica {
     @Column(name = "numero_telefono", length = 20)
     private String numeroTelefono;
 
-    @Column(length = 200)
-    private String direccion;
-
     @Column(name = "codigo_postal", length = 10)
     private String codigoPostal;
 
@@ -36,12 +34,12 @@ public class PersonaFisica {
     public PersonaFisica() {
     }
 
-    public PersonaFisica(Usuario usuario, String cuit, String nombre, String numeroTelefono, String direccion, String codigoPostal, String ciudad) {
+    public PersonaFisica(Usuario usuario, String cuit, String nombre, String numeroTelefono,
+            String codigoPostal, String ciudad) {
         this.usuario = usuario;
         this.cuit = cuit;
         this.nombre = nombre;
         this.numeroTelefono = numeroTelefono;
-        this.direccion = direccion;
         this.codigoPostal = codigoPostal;
         this.ciudad = ciudad;
     }
@@ -79,14 +77,6 @@ public class PersonaFisica {
         this.numeroTelefono = numeroTelefono;
     }
 
-    public String getDireccion() {
-        return direccion;
-    }
-
-    public void setDireccion(String direccion) {
-        this.direccion = direccion;
-    }
-
     public String getCodigoPostal() {
         return codigoPostal;
     }
@@ -110,7 +100,6 @@ public class PersonaFisica {
                 ", cuit='" + cuit + '\'' +
                 ", nombre='" + nombre + '\'' +
                 ", numeroTelefono='" + numeroTelefono + '\'' +
-                ", direccion='" + direccion + '\'' +
                 ", codigoPostal='" + codigoPostal + '\'' +
                 ", ciudad='" + ciudad + '\'' +
                 '}';

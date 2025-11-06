@@ -2,34 +2,6 @@ package com.uai.BuildLand.models;
 
 import jakarta.persistence.*;
 
-/**
- * Entidad que representa una distribuidora en el sistema BuildLand
- */
-// @Entity
-// public record Distribuidora(
-    
-//     // @Column(name = "cuit", length = 11)
-//     @Id
-//     String cuit,
-
-//     // @Column(nullable = false, length = 100)
-//     String nombre,
-
-//     // @Column(length = 200)
-//     String direccion,
-
-//     // @Column(name = "numero_telefono", length = 20)
-//     String numeroTelefono,
-
-//     // @Column(length = 255)
-//     String descripcion,
-
-//     // @Column(name = "codigo_postal", length = 10)
-//     String codigoPostal,
-
-//     // @Column(length = 100)
-//     String ciudad
-// ) {}
 @Entity
 @Table(name = "distribuidoras")
 public class Distribuidora {
@@ -39,7 +11,7 @@ public class Distribuidora {
     
     @Id
     @Column(name = "cuit", length = 11)
-    private String id;
+    private String cuit;
     
     @Column(nullable = false, length = 100)
     private String nombre;
@@ -64,7 +36,7 @@ public class Distribuidora {
 
     public Distribuidora(Usuario usuario, String cuit, String nombre, String direccion, String numeroTelefono, String descripcion, String codigoPostal, String ciudad) {
         this.usuario = usuario;
-        this.id = cuit;
+        this.cuit = cuit;
         this.nombre = nombre;
         this.direccion = direccion;
         this.numeroTelefono = numeroTelefono;
@@ -82,11 +54,11 @@ public class Distribuidora {
     }
 
     public String GetCuit() {
-        return id;
+        return cuit;
     }
 
     public void SetCuit(String cuit) {
-        this.id = cuit;
+        this.cuit = cuit;
     }
 
     public String GetNombre() {
@@ -141,7 +113,7 @@ public class Distribuidora {
     public String toString() {
         return "Distribuidora{" +
                 "id_usuario=" + usuario.getId() +
-                ", cuit='" + id + '\'' +
+                ", cuit='" + cuit + '\'' +
                 ", nombre='" + nombre + '\'' +
                 ", direccion='" + direccion + '\'' +
                 ", numeroTelefono='" + numeroTelefono + '\'' +
