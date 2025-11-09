@@ -28,10 +28,15 @@ public class DetalleCotizacion {
     @JoinColumn(name = "cotizacion_id", nullable = false)
     private Cotizacion cotizacion;
 
-    public DetalleCotizacion(Producto producto, double precioUnitario, Cotizacion cotizacion) {
+    @ManyToOne
+    @JoinColumn(name = "tipoMarca", nullable = false)
+    private Marca marca;
+
+    public DetalleCotizacion(Producto producto, double precioUnitario, Marca marca, Cotizacion cotizacion) {
         this.producto = producto;
         this.precioUnitario = precioUnitario;
         this.cotizacion = cotizacion;
+        this.marca = marca;
     }
 
     public DetalleCotizacion() {
@@ -60,5 +65,13 @@ public class DetalleCotizacion {
 
     public void setCotizacion(Cotizacion cotizacion) {
         this.cotizacion = cotizacion;
+    }
+
+    public Marca getMarca() {
+        return marca;
+    }
+
+    public void setMarca(Marca marca) {
+        this.marca = marca;
     }
 }

@@ -25,10 +25,15 @@ public class DetallePresupuesto {
     @JoinColumn(name = "presupuesto_id", nullable = false)
     private Presupuesto presupuesto;
 
-    public DetallePresupuesto(Producto producto, double cantidad, Presupuesto presupuesto) {
+    @ManyToOne
+    @JoinColumn(name = "tipoMarca", nullable = false)
+    private Marca marca;
+
+    public DetallePresupuesto(Producto producto, double cantidad, Marca marca, Presupuesto presupuesto) {
         this.producto = producto;
         this.cantidad = cantidad;
         this.presupuesto = presupuesto;
+        this.marca = marca;
     }
 
     public DetallePresupuesto() {
@@ -57,5 +62,13 @@ public class DetallePresupuesto {
 
     public void setCantidad(double cantidad) {
         this.cantidad = cantidad;
+    }
+
+    public Marca getMarca() {
+        return marca;
+    }
+
+    public void setMarca(Marca marca) {
+        this.marca = marca;
     }
 }
