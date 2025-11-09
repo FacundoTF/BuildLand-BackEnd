@@ -46,6 +46,14 @@ public class Cotizacion {
 
     }
 
+    public Long getId() {
+        return idCotizacion;
+    }
+
+    public void setId(Long id) {
+        this.idCotizacion = id;
+    }
+
     public Presupuesto getPresupuesto() {
         return presupuesto;
     }
