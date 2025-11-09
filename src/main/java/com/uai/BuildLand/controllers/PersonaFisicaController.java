@@ -21,6 +21,8 @@ import java.util.Objects;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import static com.uai.BuildLand.models.Usuario.TipoUsuario.PERSONA_FISICA;
+
 /**
  * Controlador REST para manejar las operaciones CRUD de personas físicas
  */
@@ -99,6 +101,8 @@ public class PersonaFisicaController {
         PersonaFisica personaAGuardar = persona.get();
         Usuario usuarioAGuardar = user.get();
 
+        usuarioAGuardar.setTipoUsuario(PERSONA_FISICA);
+
         if (personaAGuardar == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -117,21 +121,52 @@ public class PersonaFisicaController {
 
     /**
      * Actualiza una persona física existente
-     * 
+     *
      * @param cuit          CUIT de la persona física a actualizar
      * @param personaFisica Datos actualizados
      * @return Persona física actualizada o 404 si no existe
      */
-    @PatchMapping("/{cuit}")
+    @PatchMapping("/")
     public ResponseEntity<PersonaFisica> actualizar(@RequestBody PersonaFisica personaFisica) {
         String nonNullCuit = Objects.requireNonNull(personaFisica.getCuit(), "cuit must not be null");
-        Optional<PersonaFisica> personaFisicaDesactualizada = personaFisicaRepository.findById(nonNullCuit);
-        if (personaFisicaDesactualizada.isPresent()) {
-            personaFisicaRepository.save(personaFisica);
-            return ResponseEntity.ok(personaFisica);
-        } else {
+        Optional<PersonaFisica> personaFisicaExistenteOpt = personaFisicaRepository.findById(nonNullCuit);
+
+        if (personaFisicaExistenteOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
+        PersonaFisica personaFisicaExistente = personaFisicaExistenteOpt.get();
+
+        // Actualizar solo los campos de PersonaFisica sin tocar el Usuario
+        if (personaFisica.getNombre() != null) {
+            personaFisicaExistente.setNombre(personaFisica.getNombre());
+        }
+        if (personaFisica.getCiudad() != null) {
+            personaFisicaExistente.setCiudad(personaFisica.getCiudad());
+        }
+        if (personaFisica.getCodigoPostal() != null) {
+            personaFisicaExistente.setCodigoPostal(personaFisica.getCodigoPostal());
+        }
+        if (personaFisica.getNumeroTelefono() != null) {
+            personaFisicaExistente.setNumeroTelefono(personaFisica.getNumeroTelefono());
+        }
+
+        // Si se proporciona información del usuario, actualizar solo email y password
+        // manteniendo el ID del usuario existente
+        if (personaFisica.getUsuario() != null) {
+            Usuario usuarioExistente = personaFisicaExistente.getUsuario();
+            Usuario usuarioActualizado = personaFisica.getUsuario();
+
+            if (usuarioActualizado.getEmail() != null && !usuarioActualizado.getEmail().trim().isEmpty()) {
+                usuarioExistente.setEmail(usuarioActualizado.getEmail());
+            }
+            if (usuarioActualizado.getPassword() != null && !usuarioActualizado.getPassword().trim().isEmpty()) {
+                usuarioExistente.setPassword(usuarioActualizado.getPassword());
+            }
+        }
+
+        PersonaFisica personaActualizada = personaFisicaRepository.save(personaFisicaExistente);
+        return ResponseEntity.ok(personaActualizada);
     }
 
     /**
@@ -149,9 +184,9 @@ public class PersonaFisicaController {
 
         if (personaExiste) {
             personaFisicaRepository.deleteById(nonNullCuit);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
