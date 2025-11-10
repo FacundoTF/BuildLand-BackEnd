@@ -1,6 +1,10 @@
 package com.uai.BuildLand.controllers;
 
+import com.uai.BuildLand.controllers.DTOs.DetallePresupuesto_Producto_DTO;
+import com.uai.BuildLand.models.Categoria;
+import com.uai.BuildLand.models.DetallePresupuesto;
 import com.uai.BuildLand.models.Presupuesto;
+import com.uai.BuildLand.models.Producto;
 import com.uai.BuildLand.repositories.PresupuestoRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,20 +38,53 @@ public class PresupuestoController {
     }
 
     @PostMapping
-    public ResponseEntity<Presupuesto> crear(@RequestBody Presupuesto presupuesto, UriComponentsBuilder ucb) {
+    public ResponseEntity<Presupuesto> crear(@RequestBody Presupuesto presupuesto, @RequestBody DetallePresupuesto_Producto_DTO[] dto, UriComponentsBuilder ucb) {
         if (presupuesto.getPersona() == null || presupuesto.getCategoria() == null) {
             return ResponseEntity.badRequest().build();
         }
 
-        presupuesto.setFecha(new Date());
-        if (presupuesto.getDetalles() != null) {
-            presupuesto.getDetalles().forEach(detalle -> detalle.setPresupuesto(presupuesto));
+        for (DetallePresupuesto_Producto_DTO detalle : dto) {
+            if (detalle.getProducto() == null || detalle.getDetallePresupuesto() == null) {
+                return ResponseEntity.badRequest().build();
+            }else {
+                boolean valido = verificarDatosInternos(detalle.getProducto(), detalle.getDetallePresupuesto());
+
+                if (!valido) {
+                    return ResponseEntity.badRequest().build();
+                }
+
+                detalle.getProducto().setCategoria(presupuesto.getCategoria());
+                presupuesto.getDetalles().add(new DetallePresupuesto(
+                        detalle.getProducto(),
+                        detalle.getDetallePresupuesto().getCantidad(),
+                        detalle.getDetallePresupuesto().getMarca()
+                ));
+            }
         }
+
+        presupuesto.setFecha(new Date());
+
         presupuesto.setCotizaciones(new ArrayList<>());
 
         Presupuesto presupuestoGuardado = presupuestoRepository.save(presupuesto);
         URI uri = ucb.path("/presupuestos/{id}").buildAndExpand(presupuestoGuardado.getId()).toUri();
         return ResponseEntity.created(uri).body(presupuestoGuardado);
+    }
+
+    private boolean verificarDatosInternos(Producto producto, DetallePresupuesto detallePresupuesto) {
+        if (detallePresupuesto.getMarca() == null) {
+            return false;
+        }
+
+        if (detallePresupuesto.getCantidad() <= 0) {
+            return false;
+        }
+
+        if(detallePresupuesto.getProducto() == null) {
+            return false;
+        }
+
+        return true;
     }
 
     @PatchMapping("/{id}")

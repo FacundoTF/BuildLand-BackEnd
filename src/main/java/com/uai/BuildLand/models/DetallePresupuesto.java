@@ -36,6 +36,13 @@ public class DetallePresupuesto {
         this.marca = marca;
     }
 
+    public DetallePresupuesto(Producto producto, double cantidad, Marca marca) {
+        this.producto = producto;
+        this.cantidad = cantidad;
+        this.presupuesto = null;
+        this.marca = marca;
+    }
+
     public DetallePresupuesto() {
 
     }
