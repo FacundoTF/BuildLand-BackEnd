@@ -54,9 +54,6 @@ public class ProductoController {
         if (productoActualizado.getNombre() != null && !productoActualizado.getNombre().trim().isEmpty()) {
             productoExistente.setNombre(productoActualizado.getNombre());
         }
-        if (productoActualizado.getPrecio() > 0) {
-            productoExistente.setPrecio(productoActualizado.getPrecio());
-        }
         if (productoActualizado.getCategoria() != null) {
             productoExistente.setCategoria(productoActualizado.getCategoria());
         }

@@ -19,16 +19,13 @@ public class Producto {
 
     @Column(name = "nombre", length = 100)
     private String nombre;
-    @Column(name = "precio")
-    private double precio;
 
     @ManyToOne
     @JoinColumn(name = "nombre_categoria", nullable = false)
     private Categoria categoria;
 
-    public Producto(String nombre, double precio, Categoria categoria) {
+    public Producto(String nombre, Categoria categoria) {
         this.nombre = nombre;
-        this.precio = precio;
         this.categoria = categoria;
     }
 
@@ -50,14 +47,6 @@ public class Producto {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
-    }
-
-    public double getPrecio() {
-        return precio;
-    }
-
-    public void setPrecio(double precio) {
-        this.precio = precio;
     }
 
     public Categoria getCategoria() {
