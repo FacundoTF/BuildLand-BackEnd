@@ -20,7 +20,7 @@ import java.util.Objects;
  * Controlador REST para manejar las operaciones CRUD de distribuidoras
  */
 @RestController
-@RequestMapping("/distribuidoras")
+@RequestMapping("api/distribuidoras")
 @CrossOrigin(origins = "*")
 public class DistribuidoraController {
     private final DistribuidoraRepository distribuidoraRepository;
