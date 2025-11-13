@@ -1,51 +1,53 @@
 package com.uai.BuildLand.models;
 
-// import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-// import jakarta.persistence.GeneratedValue;
-// import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "marcas")
 public class Marca {
-    // @Id
-    // @GeneratedValue(strategy = GenerationType.IDENTITY)
-    // @Column(name = "id", nullable = false, updatable = false)
-    // private Long idMarca;
-
-    private enum marcas {
-        GENERICA,
-        NO_GENERICA
-    }
 
     @Id
-    @Enumerated(EnumType.STRING)
-    private marcas tipoMarca;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    public marcas getTipoMarca() {
-        return tipoMarca;
-    }
+    @Column(nullable = false)
+    private String nombre;
 
-    public void setTipoMarca(marcas tipoMarca) {
-        this.tipoMarca = tipoMarca;
-    }
+    @ManyToOne
+    @JoinColumn(name = "categoria_nombre", nullable = false)
+    private Categoria categoria;
+
+    // Constructors, Getters and Setters
 
     public Marca() {
-        this.tipoMarca = marcas.GENERICA;
     }
 
-    public Marca(String tipoMarca) {
-        try {
-            this.tipoMarca = marcas.valueOf(tipoMarca);
-        } catch (IllegalArgumentException e) {
-            this.tipoMarca = marcas.GENERICA;
-        } catch (NullPointerException e2) {
-            this.tipoMarca = marcas.GENERICA;
-        }
+    public Marca(String nombre, Categoria categoria) {
+        this.nombre = nombre;
+        this.categoria = categoria;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public Categoria getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
+    }
 }
