@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/productos")
+@RequestMapping("api/productos")
 @CrossOrigin(origins = "*")
 public class ProductoController {
 
@@ -79,5 +79,14 @@ public class ProductoController {
                 pageable.getPageSize(),
                 pageable.getSortOr(Sort.by(Sort.Direction.ASC, "nombre"))));
         return ResponseEntity.ok(productos.getContent());
+    }
+
+    @GetMapping("/categorias/{nombreCategoria}")
+    public ResponseEntity<List<Producto>> obtenerPorCategoria(@PathVariable String nombreCategoria) {
+        List<Producto> productos = productoRepository.findByCategoriaNombre(nombreCategoria);
+        if (productos.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(productos);
     }
 }
