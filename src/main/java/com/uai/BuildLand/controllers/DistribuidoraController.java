@@ -1,5 +1,7 @@
 package com.uai.BuildLand.controllers;
 
+import com.uai.BuildLand.models.Usuario;
+import com.uai.BuildLand.repositories.UsuarioRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,9 +26,11 @@ import java.util.Objects;
 @CrossOrigin(origins = "*")
 public class DistribuidoraController {
     private final DistribuidoraRepository distribuidoraRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public DistribuidoraController(DistribuidoraRepository distribuidoraRepository) {
+    public DistribuidoraController(DistribuidoraRepository distribuidoraRepository, UsuarioRepository usuarioRepository) {
         this.distribuidoraRepository = distribuidoraRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     /**
@@ -60,38 +64,58 @@ public class DistribuidoraController {
             return ResponseEntity.badRequest().build();
         }
 
-        if (distribuidora.GetCuit() == null || distribuidora.GetCuit().trim().isEmpty() || distribuidora.GetCuit().length() != 11) {
+        boolean validarDatos = verificarDatosInternos(distribuidora);
+        boolean existePorNombre = distribuidoraRepository.existsByNombreIgnoreCase(distribuidora.GetNombre());
+        boolean existePorCuit = distribuidoraRepository.existsById(distribuidora.GetCuit());
+        Optional<Usuario> existePorMail = usuarioRepository.findByEmail(distribuidora.getUsuario().getEmail());
+
+        if (existePorNombre || existePorCuit || existePorMail.isEmpty()) {
             return ResponseEntity.badRequest().build();
+        }
+
+        if (!validarDatos) {
+            ResponseEntity.badRequest().build();
+        }
+
+        try {
+            Distribuidora distribuidoraGuardada = distribuidoraRepository.save(distribuidora);
+            URI uri = ucb.path("/distribuidoras/{cuit}").buildAndExpand(distribuidoraGuardada.GetCuit()).toUri();
+            return ResponseEntity.created(uri).body(distribuidoraGuardada);
+        }catch(Exception e){
+            ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.badRequest().build();
+    }
+
+    private boolean verificarDatosInternos(Distribuidora distribuidora) {
+        if (distribuidora.GetCuit() == null || distribuidora.GetCuit().trim().isEmpty() || distribuidora.GetCuit().length() != 11) {
+            return false;
         }
 
         if (distribuidora.GetNombre() == null || distribuidora.GetNombre().trim().isEmpty() || distribuidora.GetNombre().length() > 100) {
-            return ResponseEntity.badRequest().build();
+            return false;
         }
 
         if (distribuidora.GetCiudad() == null || distribuidora.GetCiudad().trim().isEmpty() || distribuidora.GetCiudad().length() > 100) {
-            return ResponseEntity.badRequest().build();
+            return false;
         }
 
         if (distribuidora.GetDireccion() == null || distribuidora.GetDireccion().trim().isEmpty() || distribuidora.GetDireccion().length() > 200) {
-            return ResponseEntity.badRequest().build();
+            return false;
         }
 
         if (distribuidora.GetCodigoPostal() == null || distribuidora.GetCodigoPostal().trim().isEmpty() || distribuidora.GetCodigoPostal().length() > 10) {
-            return ResponseEntity.badRequest().build();
+            return false;
         }
 
         if (distribuidora.GetNumeroTelefono() == null || distribuidora.GetNumeroTelefono().trim().isEmpty() || distribuidora.GetNumeroTelefono().length() > 20) {
-            return ResponseEntity.badRequest().build();
+            return false;
         }
 
         if (distribuidora.GetDescripcion() != null && !distribuidora.GetDescripcion().trim().isEmpty() && distribuidora.GetDescripcion().length() > 255) {
-            return ResponseEntity.badRequest().build();
+            return false;
         }
-
-        Distribuidora distribuidoraGuardada = distribuidoraRepository.save(distribuidora);
-
-        URI uri = ucb.path("/distribuidoras/{cuit}").buildAndExpand(distribuidoraGuardada.GetCuit()).toUri();
-        return ResponseEntity.created(uri).body(distribuidoraGuardada);
+        return true;
     }
 
     /**
