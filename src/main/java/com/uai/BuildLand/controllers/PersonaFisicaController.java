@@ -99,23 +99,10 @@ public class PersonaFisicaController {
         }
 
         PersonaFisica personaAGuardar = persona.get();
-        Usuario usuarioAGuardar = user.get();
-
-        usuarioAGuardar.setTipoUsuario(PERSONA_FISICA);
-
-        if (personaAGuardar == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-
-        if (usuarioAGuardar == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-
-        personaAGuardar.setUsuario(usuarioAGuardar);
 
         PersonaFisica personaGuardada = personaFisicaRepository.save(personaAGuardar);
 
-        URI uri = ucb.path("/personas-fisicas/{cuit}").buildAndExpand(personaGuardada.getCuit()).toUri();
+        URI uri = ucb.path("api/personas-fisicas/{cuit}").buildAndExpand(personaGuardada.getCuit()).toUri();
         return ResponseEntity.created(uri).body(personaGuardada);
     }
 
