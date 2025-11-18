@@ -65,54 +65,54 @@ public class DistribuidoraController {
         }
 
         boolean validarDatos = verificarDatosInternos(distribuidora);
-        boolean existePorNombre = distribuidoraRepository.existsByNombreIgnoreCase(distribuidora.GetNombre());
-        boolean existePorCuit = distribuidoraRepository.existsById(distribuidora.GetCuit());
+        boolean existePorNombre = distribuidoraRepository.existsByNombreIgnoreCase(distribuidora.getNombre());
+        boolean existePorCuit = distribuidoraRepository.existsById(distribuidora.getCuit());
         Optional<Usuario> existePorMail = usuarioRepository.findByEmail(distribuidora.getUsuario().getEmail());
 
-        if (existePorNombre || existePorCuit || existePorMail.isEmpty()) {
+        if (existePorNombre || existePorCuit || existePorMail.isPresent()) {
             return ResponseEntity.badRequest().build();
         }
 
         if (!validarDatos) {
-            ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().build();
         }
 
         try {
+            // El cascade guardará el usuario automáticamente
             Distribuidora distribuidoraGuardada = distribuidoraRepository.save(distribuidora);
-            URI uri = ucb.path("/distribuidoras/{cuit}").buildAndExpand(distribuidoraGuardada.GetCuit()).toUri();
+            URI uri = ucb.path("/distribuidoras/{cuit}").buildAndExpand(distribuidoraGuardada.getCuit()).toUri();
             return ResponseEntity.created(uri).body(distribuidoraGuardada);
         }catch(Exception e){
-            ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.badRequest().build();
     }
 
     private boolean verificarDatosInternos(Distribuidora distribuidora) {
-        if (distribuidora.GetCuit() == null || distribuidora.GetCuit().trim().isEmpty() || distribuidora.GetCuit().length() != 11) {
+        if (distribuidora.getCuit() == null || distribuidora.getCuit().trim().isEmpty() || distribuidora.getCuit().length() != 11) {
             return false;
         }
 
-        if (distribuidora.GetNombre() == null || distribuidora.GetNombre().trim().isEmpty() || distribuidora.GetNombre().length() > 100) {
+        if (distribuidora.getNombre() == null || distribuidora.getNombre().trim().isEmpty() || distribuidora.getNombre().length() > 100) {
             return false;
         }
 
-        if (distribuidora.GetCiudad() == null || distribuidora.GetCiudad().trim().isEmpty() || distribuidora.GetCiudad().length() > 100) {
+        if (distribuidora.getCiudad() == null || distribuidora.getCiudad().trim().isEmpty() || distribuidora.getCiudad().length() > 100) {
             return false;
         }
 
-        if (distribuidora.GetDireccion() == null || distribuidora.GetDireccion().trim().isEmpty() || distribuidora.GetDireccion().length() > 200) {
+        if (distribuidora.getDireccion() == null || distribuidora.getDireccion().trim().isEmpty() || distribuidora.getDireccion().length() > 200) {
             return false;
         }
 
-        if (distribuidora.GetCodigoPostal() == null || distribuidora.GetCodigoPostal().trim().isEmpty() || distribuidora.GetCodigoPostal().length() > 10) {
+        if (distribuidora.getCodigoPostal() == null || distribuidora.getCodigoPostal().trim().isEmpty() || distribuidora.getCodigoPostal().length() > 10) {
             return false;
         }
 
-        if (distribuidora.GetNumeroTelefono() == null || distribuidora.GetNumeroTelefono().trim().isEmpty() || distribuidora.GetNumeroTelefono().length() > 20) {
+        if (distribuidora.getNumeroTelefono() == null || distribuidora.getNumeroTelefono().trim().isEmpty() || distribuidora.getNumeroTelefono().length() > 20) {
             return false;
         }
 
-        if (distribuidora.GetDescripcion() != null && !distribuidora.GetDescripcion().trim().isEmpty() && distribuidora.GetDescripcion().length() > 255) {
+        if (distribuidora.getDescripcion() != null && !distribuidora.getDescripcion().trim().isEmpty() && distribuidora.getDescripcion().length() > 255) {
             return false;
         }
         return true;
@@ -125,7 +125,7 @@ public class DistribuidoraController {
      */
     @PatchMapping("/{cuit}")
     public ResponseEntity<Distribuidora> actualizar(@RequestBody Distribuidora distribuidora) {
-        String nonNullCuit = Objects.requireNonNull(distribuidora.GetCuit(), "cuit must not be null");
+        String nonNullCuit = Objects.requireNonNull(distribuidora.getCuit(), "cuit must not be null");
         Optional<Distribuidora> distribuidoraDesactualizada = distribuidoraRepository.findById(nonNullCuit);
         if (distribuidoraDesactualizada.isPresent()) {
             distribuidoraRepository.save(distribuidora);

@@ -1,11 +1,12 @@
 package com.uai.BuildLand.models;
 
 import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "distribuidoras")
 public class Distribuidora {
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;
     
@@ -31,14 +32,18 @@ public class Distribuidora {
     @Column(length = 100)
     private String ciudad;
     
-    @ManyToOne
-    @JoinColumn(name = "nombre_categoria")
-    private Categoria categoria;
+    @ManyToMany
+    @JoinTable(
+        name = "distribuidora_categoria",
+        joinColumns = @JoinColumn(name = "cuit"),
+        inverseJoinColumns = @JoinColumn(name = "nombre_categoria")
+    )
+    private List<Categoria> categorias;
 
     public Distribuidora() {
     }
 
-    public Distribuidora(Usuario usuario, String cuit, String nombre, String direccion, String numeroTelefono, String descripcion, String codigoPostal, String ciudad, Categoria categoria) {
+    public Distribuidora(Usuario usuario, String cuit, String nombre, String direccion, String numeroTelefono, String descripcion, String codigoPostal, String ciudad, List<Categoria> categorias) {
         this.usuario = usuario;
         this.cuit = cuit;
         this.nombre = nombre;
@@ -47,7 +52,7 @@ public class Distribuidora {
         this.descripcion = descripcion;
         this.codigoPostal = codigoPostal;
         this.ciudad = ciudad;
-        this.categoria = categoria;
+        this.categorias = categorias;
     }
 
     public Usuario getUsuario() {
@@ -58,68 +63,68 @@ public class Distribuidora {
         this.usuario = usuario;
     }
 
-    public String GetCuit() {
+    public String getCuit() {
         return cuit;
     }
 
-    public void SetCuit(String cuit) {
+    public void setCuit(String cuit) {
         this.cuit = cuit;
     }
 
-    public String GetNombre() {
+    public String getNombre() {
         return nombre;
     }
 
-    public void SetNombre(String nombre) {
+    public void setNombre(String nombre) {
         this.nombre = nombre;
     }
 
-    public String GetDireccion() {
+    public String getDireccion() {
         return direccion;
     }
 
-    public void SetDireccion(String direccion) {
+    public void setDireccion(String direccion) {
         this.direccion = direccion;
     }
 
-    public String GetNumeroTelefono() {
+    public String getNumeroTelefono() {
         return numeroTelefono;
     }
 
-    public void SetNumeroTelefono(String numeroTelefono) {
+    public void setNumeroTelefono(String numeroTelefono) {
         this.numeroTelefono = numeroTelefono;
     }
 
-    public String GetDescripcion() {
+    public String getDescripcion() {
         return descripcion;
     }
 
-    public void SetDescripcion(String descripcion) {
+    public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
 
-    public String GetCodigoPostal() {
+    public String getCodigoPostal() {
         return codigoPostal;
     }
 
-    public void SetCodigoPostal(String codigoPostal) {
+    public void setCodigoPostal(String codigoPostal) {
         this.codigoPostal = codigoPostal;
     }
 
-    public String GetCiudad() {
+    public String getCiudad() {
         return ciudad;
     }
 
-    public void SetCiudad(String ciudad) {
+    public void setCiudad(String ciudad) {
         this.ciudad = ciudad;
     }
 
-    public Categoria GetCategoria() {
-        return categoria;
+    public List<Categoria> getCategorias() {
+        return categorias;
     }
 
-    public void SetCategoria(Categoria categoria) {
-        this.categoria = categoria;
+    public void setCategorias(List<Categoria> categorias) {
+        this.categorias = categorias;
     }
 
     @Override
@@ -133,7 +138,7 @@ public class Distribuidora {
                 ", descripcion='" + descripcion + '\'' +
                 ", codigoPostal='" + codigoPostal + '\'' +
                 ", ciudad='" + ciudad + '\'' +
-                ", categoria=" + (categoria != null ? categoria.getNombre() : "null") +
+                ", categorias=" + (categorias != null ? categorias.size() : "0") + " categorías" +
                 '}';
     }
 }
