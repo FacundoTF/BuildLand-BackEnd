@@ -1,5 +1,6 @@
 package com.uai.BuildLand.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -19,6 +20,7 @@ public class DetallePresupuesto {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "presupuesto_id", nullable = false)
+    @JsonBackReference
     private Presupuesto presupuesto;
 
     public DetallePresupuesto(Producto producto, double cantidad, Presupuesto presupuesto) {

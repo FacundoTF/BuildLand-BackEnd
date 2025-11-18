@@ -3,6 +3,7 @@ package com.uai.BuildLand.models;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -23,6 +24,7 @@ public class Presupuesto {
     private Date fecha;
 
     @OneToMany(mappedBy = "presupuesto", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference
     private List<DetallePresupuesto> detalles;
 
     @OneToMany(mappedBy = "idCotizacion", cascade = CascadeType.ALL, orphanRemoval = true)
