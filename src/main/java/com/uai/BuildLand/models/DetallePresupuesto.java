@@ -1,16 +1,12 @@
 package com.uai.BuildLand.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "presupuestos_detalles")
 public class DetallePresupuesto {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_detalle_presupuesto", nullable = false, updatable = false)
     private Long idDetallePresupuesto;
 
@@ -21,26 +17,20 @@ public class DetallePresupuesto {
     @Column(name = "cantidad", nullable = false)
     private double cantidad;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "presupuesto_id", nullable = false)
     private Presupuesto presupuesto;
 
-    @ManyToOne
-    @JoinColumn(name = "tipoMarca", nullable = false)
-    private Marca marca;
-
-    public DetallePresupuesto(Producto producto, double cantidad, Marca marca, Presupuesto presupuesto) {
+    public DetallePresupuesto(Producto producto, double cantidad, Presupuesto presupuesto) {
         this.producto = producto;
         this.cantidad = cantidad;
         this.presupuesto = presupuesto;
-        this.marca = marca;
     }
 
-    public DetallePresupuesto(Producto producto, double cantidad, Marca marca) {
+    public DetallePresupuesto(Producto producto, double cantidad) {
         this.producto = producto;
         this.cantidad = cantidad;
         this.presupuesto = null;
-        this.marca = marca;
     }
 
     public DetallePresupuesto() {
@@ -69,13 +59,5 @@ public class DetallePresupuesto {
 
     public void setCantidad(double cantidad) {
         this.cantidad = cantidad;
-    }
-
-    public Marca getMarca() {
-        return marca;
-    }
-
-    public void setMarca(Marca marca) {
-        this.marca = marca;
     }
 }
