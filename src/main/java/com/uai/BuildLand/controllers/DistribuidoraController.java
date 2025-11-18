@@ -123,7 +123,7 @@ public class DistribuidoraController {
      * @param distribuidora Datos actualizados
      * @return Distribuidora actualizada o 404 si no existe
      */
-    @PatchMapping("/{cuit}")
+    @PatchMapping()
     public ResponseEntity<Distribuidora> actualizar(@RequestBody Distribuidora distribuidora) {
         String nonNullCuit = Objects.requireNonNull(distribuidora.getCuit(), "cuit must not be null");
         Optional<Distribuidora> distribuidoraDesactualizada = distribuidoraRepository.findById(nonNullCuit);
