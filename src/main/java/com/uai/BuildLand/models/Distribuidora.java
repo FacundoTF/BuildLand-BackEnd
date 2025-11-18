@@ -30,11 +30,15 @@ public class Distribuidora {
     
     @Column(length = 100)
     private String ciudad;
+    
+    @ManyToOne
+    @JoinColumn(name = "nombre_categoria")
+    private Categoria categoria;
 
     public Distribuidora() {
     }
 
-    public Distribuidora(Usuario usuario, String cuit, String nombre, String direccion, String numeroTelefono, String descripcion, String codigoPostal, String ciudad) {
+    public Distribuidora(Usuario usuario, String cuit, String nombre, String direccion, String numeroTelefono, String descripcion, String codigoPostal, String ciudad, Categoria categoria) {
         this.usuario = usuario;
         this.cuit = cuit;
         this.nombre = nombre;
@@ -43,6 +47,7 @@ public class Distribuidora {
         this.descripcion = descripcion;
         this.codigoPostal = codigoPostal;
         this.ciudad = ciudad;
+        this.categoria = categoria;
     }
 
     public Usuario getUsuario() {
@@ -109,6 +114,14 @@ public class Distribuidora {
         this.ciudad = ciudad;
     }
 
+    public Categoria GetCategoria() {
+        return categoria;
+    }
+
+    public void SetCategoria(Categoria categoria) {
+        this.categoria = categoria;
+    }
+
     @Override
     public String toString() {
         return "Distribuidora{" +
@@ -120,6 +133,7 @@ public class Distribuidora {
                 ", descripcion='" + descripcion + '\'' +
                 ", codigoPostal='" + codigoPostal + '\'' +
                 ", ciudad='" + ciudad + '\'' +
+                ", categoria=" + (categoria != null ? categoria.getNombre() : "null") +
                 '}';
     }
 }
