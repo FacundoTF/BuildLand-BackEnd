@@ -3,22 +3,14 @@ package com.uai.BuildLand.models;
 import java.util.Date;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "presupuestos")
 public class Presupuesto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_presupuesto")
     private Long idPresupuesto;
 
     @ManyToOne
@@ -30,7 +22,7 @@ public class Presupuesto {
     @Column(name = "fecha")
     private Date fecha;
 
-    @OneToMany(mappedBy = "idDetallePresupuesto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "presupuesto", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<DetallePresupuesto> detalles;
 
     @OneToMany(mappedBy = "idCotizacion", cascade = CascadeType.ALL, orphanRemoval = true)
