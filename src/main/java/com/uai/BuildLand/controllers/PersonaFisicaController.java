@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.uai.BuildLand.controllers.DTOs.PersonaFisicaCreacionDTO;
 import com.uai.BuildLand.models.PersonaFisica;
 import com.uai.BuildLand.models.Usuario;
 import com.uai.BuildLand.repositories.PersonaFisicaRepository;
@@ -19,9 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Objects;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import static com.uai.BuildLand.models.Usuario.TipoUsuario.PERSONA_FISICA;
 
 /**
  * Controlador REST para manejar las operaciones CRUD de personas físicas
@@ -54,13 +50,18 @@ public class PersonaFisicaController {
     }
 
     @PostMapping
-    public ResponseEntity<PersonaFisica> crear(@RequestBody PersonaFisicaCreacionDTO dto,
+    public ResponseEntity<PersonaFisica> crear(@RequestBody PersonaFisica personaFisica,
             UriComponentsBuilder ucb) {
 
-        Optional<PersonaFisica> persona = Optional.ofNullable(dto.getPersonaFisica());
-        Optional<Usuario> user = Optional.ofNullable(dto.getUsuario());
+        Optional<PersonaFisica> persona = Optional.ofNullable(personaFisica);
 
-        if (persona.isEmpty() || user.isEmpty()) {
+        if (persona.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Optional<Usuario> user = Optional.ofNullable(personaFisica.getUsuario());
+
+        if (user.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -106,13 +107,6 @@ public class PersonaFisicaController {
         return ResponseEntity.created(uri).body(personaGuardada);
     }
 
-    /**
-     * Actualiza una persona física existente
-     *
-     * @param cuit          CUIT de la persona física a actualizar
-     * @param personaFisica Datos actualizados
-     * @return Persona física actualizada o 404 si no existe
-     */
     @PatchMapping("/")
     public ResponseEntity<PersonaFisica> actualizar(@RequestBody PersonaFisica personaFisica) {
         String nonNullCuit = Objects.requireNonNull(personaFisica.getCuit(), "cuit must not be null");
@@ -177,12 +171,6 @@ public class PersonaFisicaController {
         }
     }
 
-    /**
-     * Busca distribuidoras por nombre
-     * 
-     * @param nombre Texto a buscar en el nombre
-     * @return Lista de distribuidoras que contienen el texto
-     */
     @GetMapping("/enlistarPorNombre")
     public ResponseEntity<List<PersonaFisica>> buscarPorNombre(Pageable pageable) {
         Page<PersonaFisica> personas = personaFisicaRepository.findAll(PageRequest.of(
