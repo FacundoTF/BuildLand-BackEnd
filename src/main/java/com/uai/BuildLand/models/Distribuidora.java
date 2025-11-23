@@ -1,5 +1,6 @@
 package com.uai.BuildLand.models;
 
+import com.uai.BuildLand.models.auth.Usuario;
 import jakarta.persistence.*;
 import java.util.List;
 

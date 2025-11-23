@@ -1,5 +1,6 @@
 package com.uai.BuildLand.models;
 
+import com.uai.BuildLand.models.auth.Usuario;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
