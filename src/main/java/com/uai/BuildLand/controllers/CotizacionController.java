@@ -1,6 +1,6 @@
 package com.uai.BuildLand.controllers;
 
-import com.uai.BuildLand.models.Cotizacion;
+import com.uai.BuildLand.models.cotizacion.Cotizacion;
 import com.uai.BuildLand.repositories.CotizacionRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,7 +13,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @RestController
