@@ -8,8 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.uai.BuildLand.models.Grupo;
+import com.uai.BuildLand.models.access.Grupo;
+import com.uai.BuildLand.models.access.GrupoSubgrupo;
 import com.uai.BuildLand.repositories.GrupoRepository;
+import com.uai.BuildLand.services.GrupoSubgrupoService;
 
 import java.net.URI;
 import java.util.List;
@@ -24,9 +26,11 @@ import java.util.Objects;
 @CrossOrigin(origins = "*")
 public class GrupoController {
     private final GrupoRepository grupoRepository;
+    private final GrupoSubgrupoService grupoSubgrupoService;
 
-    public GrupoController(GrupoRepository grupoRepository) {
+    public GrupoController(GrupoRepository grupoRepository, GrupoSubgrupoService grupoSubgrupoService) {
         this.grupoRepository = grupoRepository;
+        this.grupoSubgrupoService = grupoSubgrupoService;
     }
 
     /**
@@ -122,5 +126,40 @@ public class GrupoController {
             pageable.getPageSize(),
             pageable.getSortOr(Sort.by(Sort.Direction.ASC, "nombre"))));
         return ResponseEntity.ok(grupos.getContent());
+    }
+
+    /**
+     * Agrega un subgrupo a un grupo padre
+     * Previene referencias circulares validando que el grupo hijo no contenga al grupo padre
+     * 
+     * @param grupoPadreId ID del grupo padre
+     * @param grupoHijoId ID del grupo que será subgrupo
+     * @return GrupoSubgrupo creado o error si la operación es inválida
+     */
+    @PostMapping("/{grupoPadreId}/subgrupos/{grupoHijoId}")
+    public ResponseEntity<?> agregarSubgrupo(@PathVariable Long grupoPadreId, 
+                                              @PathVariable Long grupoHijoId) {
+        try {
+            GrupoSubgrupo relacion = grupoSubgrupoService.agregarSubgrupo(grupoPadreId, grupoHijoId);
+            return ResponseEntity.status(201).body(relacion);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    /**
+     * Elimina la relación de subgrupo
+     * 
+     * @param relacionId ID de la relación a eliminar
+     * @return 204 si se eliminó correctamente, 404 si no existe
+     */
+    @DeleteMapping("/subgrupos/{relacionId}")
+    public ResponseEntity<Void> eliminarSubgrupo(@PathVariable Long relacionId) {
+        try {
+            grupoSubgrupoService.eliminarSubgrupo(relacionId);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
