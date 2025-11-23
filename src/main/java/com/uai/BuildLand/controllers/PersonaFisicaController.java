@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.uai.BuildLand.models.PersonaFisica;
-import com.uai.BuildLand.models.Usuario;
+import com.uai.BuildLand.models.auth.Usuario;
 import com.uai.BuildLand.repositories.PersonaFisicaRepository;
 
 import java.net.URI;

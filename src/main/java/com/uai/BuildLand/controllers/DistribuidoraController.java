@@ -1,6 +1,6 @@
 package com.uai.BuildLand.controllers;
 
-import com.uai.BuildLand.models.Usuario;
+import com.uai.BuildLand.models.auth.Usuario;
 import com.uai.BuildLand.repositories.UsuarioRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

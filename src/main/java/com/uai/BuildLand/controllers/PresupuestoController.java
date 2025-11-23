@@ -1,7 +1,9 @@
 package com.uai.BuildLand.controllers;
 
-import com.uai.BuildLand.controllers.DTOs.DetallePresupuesto_Producto_DTO;
 import com.uai.BuildLand.models.*;
+import com.uai.BuildLand.models.cotizacion.Cotizacion;
+import com.uai.BuildLand.models.presupuesto.DetallePresupuesto;
+import com.uai.BuildLand.models.presupuesto.Presupuesto;
 import com.uai.BuildLand.repositories.MarcaRepository;
 import com.uai.BuildLand.repositories.PresupuestoRepository;
 import com.uai.BuildLand.repositories.ProductoRepository;

@@ -1,6 +1,6 @@
 package com.uai.BuildLand.repositories;
 
-import com.uai.BuildLand.models.Presupuesto;
+import com.uai.BuildLand.models.presupuesto.Presupuesto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

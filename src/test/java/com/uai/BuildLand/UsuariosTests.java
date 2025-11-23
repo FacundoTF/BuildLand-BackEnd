@@ -9,9 +9,8 @@ import org.springframework.http.HttpStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.uai.BuildLand.models.Usuario;
+import com.uai.BuildLand.models.auth.Usuario;
 import com.uai.BuildLand.repositories.UsuarioRepository;
-import com.uai.BuildLand.security.PasswordEncoder;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UsuariosTests {
@@ -29,7 +28,7 @@ public class UsuariosTests {
 
         // Crear un usuario de prueba con contraseña encriptada
         // Usuario usuarioGuardado = new Usuario();
-        // usuarioGuardado.setEmail(email);
+        // usuarioGuardado.setUsername(email);
         // usuarioGuardado.setPassword(PasswordEncoder.encode(password));
         // usuarioGuardado.setTipoUsuario(Usuario.TipoUsuario.PERSONA_FISICA);
         // usuarioRepository.save(usuarioGuardado);

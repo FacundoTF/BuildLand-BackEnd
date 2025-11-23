@@ -3,7 +3,7 @@ package com.uai.BuildLand.repositories;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import com.uai.BuildLand.models.Usuario;
+import com.uai.BuildLand.models.auth.Usuario;
 
 import java.util.Optional;
 
