@@ -1,9 +1,12 @@
-package com.uai.BuildLand.models;
+package com.uai.BuildLand.models.presupuesto;
 
 import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.uai.BuildLand.models.Categoria;
+import com.uai.BuildLand.models.PersonaFisica;
+import com.uai.BuildLand.models.cotizacion.Cotizacion;
 import jakarta.persistence.*;
 
 @Entity

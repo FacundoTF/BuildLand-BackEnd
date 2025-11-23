@@ -1,4 +1,4 @@
-package com.uai.BuildLand.models;
+package com.uai.BuildLand.models.access;
 
 import jakarta.persistence.*;
 
@@ -10,7 +10,8 @@ import jakarta.persistence.*;
 public class Permiso implements ConjuntoGrupoPermiso {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id")
+    private Long idPermiso;
     
     @Column(nullable = false, unique = true, length = 100)
     private String nombre;
@@ -25,11 +26,11 @@ public class Permiso implements ConjuntoGrupoPermiso {
     }
 
     public Long getId() {
-        return id;
+        return idPermiso;
     }
 
     public void setId(Long id) {
-        this.id = id;
+        this.idPermiso = id;
     }
 
     public String getNombre() {
@@ -43,7 +44,7 @@ public class Permiso implements ConjuntoGrupoPermiso {
     @Override
     public String toString() {
         return "Permiso{" +
-                "id=" + id +
+                "id=" + idPermiso +
                 ", nombre='" + nombre + '\'' +
                 '}';
     }

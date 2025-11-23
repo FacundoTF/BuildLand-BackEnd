@@ -1,7 +1,6 @@
-package com.uai.BuildLand.models;
+package com.uai.BuildLand.models.cotizacion;
 
-import java.util.UUID;
-
+import com.uai.BuildLand.models.Producto;
 import jakarta.persistence.*;
 
 @Entity

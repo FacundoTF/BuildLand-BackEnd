@@ -1,5 +1,7 @@
-package com.uai.BuildLand.models;
+package com.uai.BuildLand.models.auth;
 
+import com.uai.BuildLand.models.access.Grupo;
+import com.uai.BuildLand.models.access.Permiso;
 import jakarta.persistence.*;
 
 /**
@@ -21,10 +23,6 @@ public class Usuario {
     @Column(name = "id_referencia", length = 50)
     private String idReferencia; // ID de la distribuidora, empleado o persona física
 
-    @ManyToOne
-    @JoinColumn(name = "id_grupo")
-    private Grupo grupo;
-
     @Column(name = "email", unique = true, nullable = false, length = 100)
     private String email;
 
@@ -43,10 +41,9 @@ public class Usuario {
     }
 
     // Constructor con parámetros
-    public Usuario(TipoUsuario tipoUsuario, String idReferencia, Grupo grupo, String email, String password) {
+    public Usuario(TipoUsuario tipoUsuario, String idReferencia, String email, String password) {
         this.tipoUsuario = tipoUsuario;
         this.idReferencia = idReferencia;
-        this.grupo = grupo;
         this.email = email;
         this.password = password;
     }
@@ -98,7 +95,6 @@ public class Usuario {
                 "id=" + id +
                 ", tipoUsuario=" + tipoUsuario +
                 ", idReferencia='" + idReferencia + '\'' +
-                ", grupo=" + (grupo != null ? grupo.getNombre() : "null") +
                 ", email='" + email + '\'' +
                 '}';
     }

@@ -1,7 +1,9 @@
-package com.uai.BuildLand.models;
+package com.uai.BuildLand.models.access;
 
 import java.util.List;
 import java.util.ArrayList;
+
+import com.uai.BuildLand.models.auth.Usuario;
 import jakarta.persistence.*;
 
 /**
@@ -28,24 +30,23 @@ public class Grupo implements ConjuntoGrupoPermiso {
     )
     private List<Permiso> permisos = new ArrayList<>();
     
-    @ManyToMany
-    @JoinTable(
-        name = "grupo_subgrupos",
-        joinColumns = @JoinColumn(name = "id_grupo_padre"),
-        inverseJoinColumns = @JoinColumn(name = "id_grupo_hijo")
-    )
-    private List<Grupo> grupos = new ArrayList<>();
+    @OneToMany(mappedBy = "grupoPadre", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GrupoSubgrupo> subgrupos = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "grupoHijo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GrupoSubgrupo> gruposContenedores = new ArrayList<>();
 
     // Constructor por defecto
     public Grupo() {
     }
 
     // Constructor con parámetros
-    public Grupo(String nombre, String descripcion, List<Permiso> permisos, List<Grupo> grupos) {
+    public Grupo(String nombre, String descripcion, List<Permiso> permisos) {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.permisos = permisos != null ? permisos : new ArrayList<>();
-        this.grupos = grupos != null ? grupos : new ArrayList<>();
+        this.subgrupos = new ArrayList<>();
+        this.gruposContenedores = new ArrayList<>();
     }
 
     // Getters y Setters
@@ -81,12 +82,20 @@ public class Grupo implements ConjuntoGrupoPermiso {
         this.permisos = permisos;
     }
 
-    public List<Grupo> getGrupos() {
-        return grupos;
+    public List<GrupoSubgrupo> getSubgrupos() {
+        return subgrupos;
     }
 
-    public void setGrupos(List<Grupo> grupos) {
-        this.grupos = grupos;
+    public void setSubgrupos(List<GrupoSubgrupo> subgrupos) {
+        this.subgrupos = subgrupos;
+    }
+
+    public List<GrupoSubgrupo> getGruposContenedores() {
+        return gruposContenedores;
+    }
+
+    public void setGruposContenedores(List<GrupoSubgrupo> gruposContenedores) {
+        this.gruposContenedores = gruposContenedores;
     }
 
     @Override
@@ -96,7 +105,7 @@ public class Grupo implements ConjuntoGrupoPermiso {
                 ", nombre='" + nombre + '\'' +
                 ", descripcion='" + descripcion + '\'' +
                 ", permisos=" + permisos.size() +
-                ", grupos=" + grupos.size() +
+                ", subgrupos=" + subgrupos.size() +
                 '}';
     }
 }

@@ -1,4 +1,4 @@
-package com.uai.BuildLand.models;
+package com.uai.BuildLand.models.access;
 
 /**
  * Interfaz que representa un conjunto de grupos y permisos.

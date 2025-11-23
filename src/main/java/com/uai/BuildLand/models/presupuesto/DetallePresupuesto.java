@@ -1,6 +1,7 @@
-package com.uai.BuildLand.models;
+package com.uai.BuildLand.models.presupuesto;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.uai.BuildLand.models.Producto;
 import jakarta.persistence.*;
 
 @Entity
