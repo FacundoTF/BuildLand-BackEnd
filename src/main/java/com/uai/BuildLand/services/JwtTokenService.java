@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,13 +26,13 @@ public class JwtTokenService {
 
     public String generateToken(Authentication authentication, AuthUserInfoDto authUserInfoDto) {
         Instant now = Instant.now();
-        String scope = "ROLE_ADMIN";
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(now)
                 .expiresAt(now.plus(1, ChronoUnit.HOURS))
                 .subject(authentication.getName())
-                .claim("scope", scope)
+                .claim("grupos", authUserInfoDto)
+                .claim("permisos", authUserInfoDto.getPermisos())
                 .build();
         var encoderParameters = JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claims);
         return this.encoder.encode(encoderParameters).getTokenValue();
@@ -40,5 +42,15 @@ public class JwtTokenService {
         Jwt jwt = decoder.decode(token);
         var exp = (Instant) jwt.getClaim("exp");
         return exp.toEpochMilli();
+    }
+
+    public List<String> extraerPermisos(String token) {
+        Jwt jwt = decoder.decode(token);
+        return (List<String>) jwt.getClaim("permisos");
+    }
+
+    public List<String> extraerGrupos(String token) {
+        Jwt jwt = decoder.decode(token);
+        return (List<String>) jwt.getClaim("grupos");
     }
 }
