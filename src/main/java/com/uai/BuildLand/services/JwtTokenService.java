@@ -1,5 +1,6 @@
 package com.uai.BuildLand.services;
 
+import com.uai.BuildLand.models.dto.AuthUserInfoDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -21,7 +22,7 @@ public class JwtTokenService {
     private final JwtEncoder encoder;
     private final JwtDecoder decoder;
 
-    public String generateToken(Authentication authentication) {
+    public String generateToken(Authentication authentication, AuthUserInfoDto authUserInfoDto) {
         Instant now = Instant.now();
         String scope = "ROLE_ADMIN";
         JwtClaimsSet claims = JwtClaimsSet.builder()
