@@ -33,13 +33,14 @@ public class AuthService {
 
         AuthUserInfoDto authUserInfoDto = getUserInfo(authentication.getName());
 
-        System.out.println(authUserInfoDto);
-
         String jwtToken = jwtTokenService.generateToken(authentication, authUserInfoDto);
         Long expiresAt = jwtTokenService.extractExpirationTime(jwtToken);
 
+        String refreshJwtToken = jwtTokenService.generateRefreshToken(authentication, authUserInfoDto);
+        Long refreshTokenExpiresAt = jwtTokenService.extractExpirationTime(refreshJwtToken);
+
         return new AuthUserInfoDto(
-                new AuthResponse(jwtToken, authentication.getName(), expiresAt),
+                new AuthResponse(jwtToken, authentication.getName(), expiresAt, refreshJwtToken, refreshTokenExpiresAt),
                 authUserInfoDto.getGrupos(),
                 authUserInfoDto.getPermisos()
         );
