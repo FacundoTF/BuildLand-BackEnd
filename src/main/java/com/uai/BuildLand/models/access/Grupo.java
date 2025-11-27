@@ -22,7 +22,7 @@ public class Grupo implements ConjuntoGrupoPermiso {
     @Column(length = 255)
     private String descripcion;
     
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "grupo_permisos",
         joinColumns = @JoinColumn(name = "id_grupo"),
