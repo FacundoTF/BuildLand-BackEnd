@@ -7,6 +7,7 @@ import com.uai.BuildLand.models.presupuesto.Presupuesto;
 import com.uai.BuildLand.repositories.MarcaRepository;
 import com.uai.BuildLand.repositories.PresupuestoRepository;
 import com.uai.BuildLand.repositories.ProductoRepository;
+import com.uai.BuildLand.services.EmailService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,11 +30,13 @@ public class PresupuestoController {
     private final PresupuestoRepository presupuestoRepository;
     private final ProductoRepository productoRepository;
     private final MarcaRepository marcaRepository;
+    private final EmailService emailService;
 
-    public PresupuestoController(PresupuestoRepository presupuestoRepository, ProductoRepository productoRepository, MarcaRepository marcaRepository) {
+    public PresupuestoController(PresupuestoRepository presupuestoRepository, ProductoRepository productoRepository, MarcaRepository marcaRepository, EmailService emailService) {
         this.presupuestoRepository = presupuestoRepository;
         this.productoRepository = productoRepository;
         this.marcaRepository = marcaRepository;
+        this.emailService = emailService;
     }
 
     @GetMapping("/{id}")
@@ -72,6 +75,15 @@ public class PresupuestoController {
         presupuesto.setCotizaciones(new ArrayList<Cotizacion>());
 
         Presupuesto presupuestoGuardado = presupuestoRepository.save(presupuesto);
+
+        // Enviar email con los detalles del presupuesto
+        try {
+            emailService.sendPresupuestoMail(presupuestoGuardado);
+        } catch (Exception e) {
+            // Log del error pero no fallar la creación del presupuesto
+            System.err.println("Error al enviar email de presupuesto: " + e.getMessage());
+        }
+
         URI uri = ucb.path("api/presupuestos/{id}").buildAndExpand(presupuestoGuardado.getId()).toUri();
         return ResponseEntity.created(uri).body(presupuestoGuardado);
     }
