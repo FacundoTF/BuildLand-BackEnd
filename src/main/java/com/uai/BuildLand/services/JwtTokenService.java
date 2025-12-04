@@ -45,8 +45,6 @@ public class JwtTokenService {
                 .issuedAt(now)
                 .expiresAt(now.plus(48, ChronoUnit.HOURS))
                 .subject(authentication.getName())
-                .claim("grupos", authUserInfoDto.getGrupos())
-                .claim("permisos", authUserInfoDto.getPermisos())
                 .build();
         var encoderParameters = JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claims);
         return this.encoder.encode(encoderParameters).getTokenValue();
