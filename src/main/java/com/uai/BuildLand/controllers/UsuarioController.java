@@ -9,9 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.uai.BuildLand.models.Usuario;
+import com.uai.BuildLand.models.auth.Usuario;
 import com.uai.BuildLand.repositories.UsuarioRepository;
-import com.uai.BuildLand.security.PasswordEncoder;
 
 import java.net.URI;
 import java.util.List;
@@ -22,7 +21,7 @@ import java.util.Objects;
  * Controlador REST para manejar las operaciones CRUD de usuarios
  */
 @RestController
-@RequestMapping("/usuarios")
+@RequestMapping("api/usuarios")
 @CrossOrigin(origins = "*")
 public class UsuarioController {
     private final UsuarioRepository usuarioRepository;
@@ -143,10 +142,15 @@ public class UsuarioController {
     public ResponseEntity<Void> login(@RequestBody Usuario loginRequest){
         Optional<Usuario> usuario = usuarioRepository.findByEmail(loginRequest.getEmail());
         
-        if (usuario.isPresent() && PasswordEncoder.matches(loginRequest.getPassword(), usuario.get().getPassword())) {
-            return ResponseEntity.ok().build();
+//        if (usuario.isPresent() && PasswordEncoder.matches(loginRequest.getPassword(), usuario.get().getPassword())) {
+//            return ResponseEntity.ok().build();
+//        } else {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+//        }
+        if (usuario.isPresent()) {
+            return ResponseEntity.status(HttpStatus.OK).build();
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 }

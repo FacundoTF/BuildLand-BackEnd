@@ -5,20 +5,19 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 
 import com.uai.BuildLand.models.Distribuidora;
 
+import java.util.List;
+
 public interface DistribuidoraRepository extends CrudRepository<Distribuidora, String>, PagingAndSortingRepository<Distribuidora, String> {
-    // /**
-    //  * Busca distribuidoras por nombre (case insensitive)
-    //  * @param nombre Nombre a buscar
-    //  * @return Lista de distribuidoras que contienen el nombre
-    //  */
-    // boolean existsByNombreIgnoreCase(String nombre);
+    boolean existsByNombreIgnoreCase(String nombre);
+
+    List<Distribuidora> findByCategoriasNombre(String nombre);
 
     // /**
     //  * Busca distribuidoras por correo electrónico del usuario asociado (case insensitive)
     //  * @param correoElectronico Correo electrónico a buscar
     //  * @return true si existe una distribuidora con ese correo, false en caso contrario
     //  */
-    // boolean existsByUsuarioCorreoElectronicoIgnoreCase(String correoElectronico);
+//     boolean existsByUsuarioCorreoElectronicoIgnoreCase(String correoElectronico);
     
     /**
      * Busca una distribuidora por CUIT (campo id)

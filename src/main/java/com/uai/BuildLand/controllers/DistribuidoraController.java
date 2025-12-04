@@ -1,5 +1,7 @@
 package com.uai.BuildLand.controllers;
 
+import com.uai.BuildLand.models.auth.Usuario;
+import com.uai.BuildLand.repositories.UsuarioRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,13 +22,15 @@ import java.util.Objects;
  * Controlador REST para manejar las operaciones CRUD de distribuidoras
  */
 @RestController
-@RequestMapping("/distribuidoras")
+@RequestMapping("api/distribuidoras")
 @CrossOrigin(origins = "*")
 public class DistribuidoraController {
     private final DistribuidoraRepository distribuidoraRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public DistribuidoraController(DistribuidoraRepository distribuidoraRepository) {
+    public DistribuidoraController(DistribuidoraRepository distribuidoraRepository, UsuarioRepository usuarioRepository) {
         this.distribuidoraRepository = distribuidoraRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     /**
@@ -60,38 +64,58 @@ public class DistribuidoraController {
             return ResponseEntity.badRequest().build();
         }
 
-        if (distribuidora.GetCuit() == null || distribuidora.GetCuit().trim().isEmpty() || distribuidora.GetCuit().length() != 11) {
+        boolean validarDatos = verificarDatosInternos(distribuidora);
+        boolean existePorNombre = distribuidoraRepository.existsByNombreIgnoreCase(distribuidora.getNombre());
+        boolean existePorCuit = distribuidoraRepository.existsById(distribuidora.getCuit());
+        Optional<Usuario> existePorMail = usuarioRepository.findByEmail(distribuidora.getUsuario().getEmail());
+
+        if (existePorNombre || existePorCuit || existePorMail.isPresent()) {
             return ResponseEntity.badRequest().build();
         }
 
-        if (distribuidora.GetNombre() == null || distribuidora.GetNombre().trim().isEmpty() || distribuidora.GetNombre().length() > 100) {
+        if (!validarDatos) {
             return ResponseEntity.badRequest().build();
         }
 
-        if (distribuidora.GetCiudad() == null || distribuidora.GetCiudad().trim().isEmpty() || distribuidora.GetCiudad().length() > 100) {
+        try {
+            // El cascade guardará el usuario automáticamente
+            Distribuidora distribuidoraGuardada = distribuidoraRepository.save(distribuidora);
+            URI uri = ucb.path("/distribuidoras/{cuit}").buildAndExpand(distribuidoraGuardada.getCuit()).toUri();
+            return ResponseEntity.created(uri).body(distribuidoraGuardada);
+        }catch(Exception e){
             return ResponseEntity.badRequest().build();
         }
+    }
 
-        if (distribuidora.GetDireccion() == null || distribuidora.GetDireccion().trim().isEmpty() || distribuidora.GetDireccion().length() > 200) {
-            return ResponseEntity.badRequest().build();
+    private boolean verificarDatosInternos(Distribuidora distribuidora) {
+        if (distribuidora.getCuit() == null || distribuidora.getCuit().trim().isEmpty() || distribuidora.getCuit().length() != 11) {
+            return false;
         }
 
-        if (distribuidora.GetCodigoPostal() == null || distribuidora.GetCodigoPostal().trim().isEmpty() || distribuidora.GetCodigoPostal().length() > 10) {
-            return ResponseEntity.badRequest().build();
+        if (distribuidora.getNombre() == null || distribuidora.getNombre().trim().isEmpty() || distribuidora.getNombre().length() > 100) {
+            return false;
         }
 
-        if (distribuidora.GetNumeroTelefono() == null || distribuidora.GetNumeroTelefono().trim().isEmpty() || distribuidora.GetNumeroTelefono().length() > 20) {
-            return ResponseEntity.badRequest().build();
+        if (distribuidora.getCiudad() == null || distribuidora.getCiudad().trim().isEmpty() || distribuidora.getCiudad().length() > 100) {
+            return false;
         }
 
-        if (distribuidora.GetDescripcion() != null && !distribuidora.GetDescripcion().trim().isEmpty() && distribuidora.GetDescripcion().length() > 255) {
-            return ResponseEntity.badRequest().build();
+        if (distribuidora.getDireccion() == null || distribuidora.getDireccion().trim().isEmpty() || distribuidora.getDireccion().length() > 200) {
+            return false;
         }
 
-        Distribuidora distribuidoraGuardada = distribuidoraRepository.save(distribuidora);
+        if (distribuidora.getCodigoPostal() == null || distribuidora.getCodigoPostal().trim().isEmpty() || distribuidora.getCodigoPostal().length() > 10) {
+            return false;
+        }
 
-        URI uri = ucb.path("/distribuidoras/{cuit}").buildAndExpand(distribuidoraGuardada.GetCuit()).toUri();
-        return ResponseEntity.created(uri).body(distribuidoraGuardada);
+        if (distribuidora.getNumeroTelefono() == null || distribuidora.getNumeroTelefono().trim().isEmpty() || distribuidora.getNumeroTelefono().length() > 20) {
+            return false;
+        }
+
+        if (distribuidora.getDescripcion() != null && !distribuidora.getDescripcion().trim().isEmpty() && distribuidora.getDescripcion().length() > 255) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -99,9 +123,9 @@ public class DistribuidoraController {
      * @param distribuidora Datos actualizados
      * @return Distribuidora actualizada o 404 si no existe
      */
-    @PatchMapping("/{cuit}")
+    @PatchMapping()
     public ResponseEntity<Distribuidora> actualizar(@RequestBody Distribuidora distribuidora) {
-        String nonNullCuit = Objects.requireNonNull(distribuidora.GetCuit(), "cuit must not be null");
+        String nonNullCuit = Objects.requireNonNull(distribuidora.getCuit(), "cuit must not be null");
         Optional<Distribuidora> distribuidoraDesactualizada = distribuidoraRepository.findById(nonNullCuit);
         if (distribuidoraDesactualizada.isPresent()) {
             distribuidoraRepository.save(distribuidora);

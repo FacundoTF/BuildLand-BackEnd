@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.uai.BuildLand.models.Permiso;
+import com.uai.BuildLand.models.access.Permiso;
 import com.uai.BuildLand.repositories.PermisoRepository;
 
 import java.net.URI;
