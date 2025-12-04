@@ -36,7 +36,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/api/auth/token").permitAll();
-                    auth.requestMatchers("/api/categorias").hasAnyAuthority("Realizar presupuesto");
+                    auth.requestMatchers("/api/auth/restorePassword").permitAll();
+                    auth.requestMatchers("/api/auth/verifyPasswordCode").permitAll();
+                    auth.requestMatchers("/api/auth/changePassword").permitAll();
+                    auth.requestMatchers("/api/categorias").hasAnyAuthority("R-Pr");
                     auth.anyRequest().authenticated();
                 })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
