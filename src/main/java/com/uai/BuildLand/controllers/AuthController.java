@@ -37,9 +37,21 @@ public class AuthController {
             return ResponseEntity.status(405).build();
         }
 
-        ResponseCookie cookie = ResponseCookie.from("accessToken", authUserInfo.getAuthResponse().getToken()).httpOnly(true).secure(false).path("/").maxAge(9000).sameSite(SameSiteCookies.STRICT.toString()).build();
+        ResponseCookie cookie = ResponseCookie.from("accessToken", authUserInfo.getAuthResponse().getToken())
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(9000)
+                .sameSite(SameSiteCookies.STRICT.toString())
+                .build();
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", authUserInfo.getAuthResponse().getRefreshToken()).httpOnly(false).path("/").secure(false).maxAge(172800).sameSite(SameSiteCookies.STRICT.toString()).build();
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", authUserInfo.getAuthResponse().getRefreshToken())
+                .httpOnly(false)
+                .path("/")
+                .secure(false)
+                .maxAge(172800)
+                .sameSite(SameSiteCookies.STRICT.toString())
+                .build();
 
         AuthResponseDto responseBody = new AuthResponseDto(authUserInfo.getAuthResponse().getUsername(), authUserInfo.getGrupos(), authUserInfo.getPermisos());
 
@@ -65,15 +77,15 @@ public class AuthController {
         try {
             // Verificar que los datos no sean nulos
             if (verificationData == null ||
-                verificationData.getEmail() == null ||
-                verificationData.getCode() == null) {
+                    verificationData.getEmail() == null ||
+                    verificationData.getCode() == null) {
                 return ResponseEntity.status(400).build(); // Bad Request
             }
 
             // Verificar el código
             boolean isValid = verificationCodeService.verifyCode(
-                verificationData.getEmail(),
-                verificationData.getCode()
+                    verificationData.getEmail(),
+                    verificationData.getCode()
             );
 
             if (isValid) {
@@ -103,5 +115,26 @@ public class AuthController {
         }
 
         return ResponseEntity.status(200).build();
+    }
+
+    @PostMapping("logout")
+    public ResponseEntity<AuthResponseDto> logout() {
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(false)
+                .path("/")
+                .secure(false)
+                .maxAge(0)
+                .sameSite(SameSiteCookies.STRICT.toString())
+                .build();
+
+        ResponseCookie cookie = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .path("/")
+                .secure(false)
+                .maxAge(0)
+                .sameSite(SameSiteCookies.STRICT.toString())
+                .build();
+
+        return ResponseEntity.status(200).header(HttpHeaders.SET_COOKIE, refreshCookie.toString()).header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
     }
 }
