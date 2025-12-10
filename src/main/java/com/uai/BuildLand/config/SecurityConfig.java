@@ -39,7 +39,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/auth/restorePassword").permitAll();
                     auth.requestMatchers("/api/auth/verifyPasswordCode").permitAll();
                     auth.requestMatchers("/api/auth/changePassword").permitAll();
-                    auth.requestMatchers("/api/categorias").hasAnyAuthority("R-Pr");
+                    auth.requestMatchers("/api/categorias").hasAnyAuthority("Z-Pr", "A-DI");
                     auth.anyRequest().authenticated();
                 })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
