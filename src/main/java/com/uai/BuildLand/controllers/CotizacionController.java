@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/cotizaciones")
+@RequestMapping("api/cotizaciones")
 @CrossOrigin(origins = "*")
 public class CotizacionController {
 
