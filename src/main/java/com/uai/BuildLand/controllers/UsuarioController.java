@@ -31,14 +31,14 @@ public class UsuarioController {
     }
 
     /**
-     * Obtiene un usuario por ID
-     * @param id ID del usuario
+     * Obtiene un usuario por CUIT
+     * @param cuit CUIT del usuario
      * @return Usuario encontrado o 404 si no existe
      */
-    @GetMapping("/{id}")
-    public ResponseEntity<Usuario> obtenerPorId(@PathVariable Long id) {
-        Long nonNullId = Objects.requireNonNull(id, "id must not be null");
-        Optional<Usuario> usuario = usuarioRepository.findById(nonNullId);
+    @GetMapping("/{cuit}")
+    public ResponseEntity<Usuario> obtenerPorId(@PathVariable String cuit) {
+        String nonNullCuit = Objects.requireNonNull(cuit, "cuit must not be null");
+        Optional<Usuario> usuario = usuarioRepository.findById(nonNullCuit);
         if (usuario.isPresent()) {
             return ResponseEntity.ok(usuario.get());
         } else {
@@ -61,6 +61,10 @@ public class UsuarioController {
             return ResponseEntity.badRequest().build();
         }
 
+        if (usuario.getCuit() == null || usuario.getCuit().trim().isEmpty() || usuario.getCuit().length() > 11) {
+            return ResponseEntity.badRequest().build();
+        }
+
         if (usuario.getTipoUsuario() == null) {
             return ResponseEntity.badRequest().build();
         }
@@ -73,13 +77,9 @@ public class UsuarioController {
             return ResponseEntity.badRequest().build();
         }
 
-        if (usuario.getIdReferencia() != null && usuario.getIdReferencia().length() > 50) {
-            return ResponseEntity.badRequest().build();
-        }
-
         Usuario usuarioGuardado = usuarioRepository.save(usuario);
 
-        URI uri = ucb.path("/usuarios/{id}").buildAndExpand(usuarioGuardado.getId()).toUri();
+        URI uri = ucb.path("/usuarios/{cuit}").buildAndExpand(usuarioGuardado.getCuit()).toUri();
         return ResponseEntity.created(uri).body(usuarioGuardado);
     }
 
@@ -88,10 +88,10 @@ public class UsuarioController {
      * @param usuario Datos actualizados
      * @return Usuario actualizado o 404 si no existe
      */
-    @PatchMapping("/{id}")
+    @PatchMapping("/{cuit}")
     public ResponseEntity<Usuario> actualizar(@RequestBody Usuario usuario) {
-        Long nonNullId = Objects.requireNonNull(usuario.getId(), "id must not be null");
-        Optional<Usuario> usuarioDesactualizado = usuarioRepository.findById(nonNullId);
+        String nonNullCuit = Objects.requireNonNull(usuario.getCuit(), "cuit must not be null");
+        Optional<Usuario> usuarioDesactualizado = usuarioRepository.findById(nonNullCuit);
         if (usuarioDesactualizado.isPresent()) {
             usuarioRepository.save(usuario);
             return ResponseEntity.ok(usuario);
@@ -101,18 +101,18 @@ public class UsuarioController {
     }
 
     /**
-     * Elimina un usuario por ID
-     * @param id ID del usuario a eliminar
+     * Elimina un usuario por CUIT
+     * @param cuit CUIT del usuario a eliminar
      * @return 204 si se eliminó correctamente, 404 si no existía
      */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        Long nonNullId = Objects.requireNonNull(id, "id must not be null");
+    @DeleteMapping("/{cuit}")
+    public ResponseEntity<Void> eliminar(@PathVariable String cuit) {
+        String nonNullCuit = Objects.requireNonNull(cuit, "cuit must not be null");
 
-        boolean usuarioExiste = usuarioRepository.existsById(nonNullId);
+        boolean usuarioExiste = usuarioRepository.existsById(nonNullCuit);
 
         if (usuarioExiste) {
-            usuarioRepository.deleteById(nonNullId);
+            usuarioRepository.deleteById(nonNullCuit);
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.notFound().build();

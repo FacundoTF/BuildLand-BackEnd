@@ -17,8 +17,8 @@ public class UsuarioPermiso {
     
     @Id
     @ManyToOne
-    @JoinColumn(name = "id_usuario", nullable = false)
-    private Usuario usuario;
+    @JoinColumn(name = "cuit", nullable = false, referencedColumnName = "cuit", columnDefinition = "varchar(11)")
+    private Usuario cuit;
 
     @Id
     @ManyToOne
@@ -34,18 +34,18 @@ public class UsuarioPermiso {
     }
 
     public UsuarioPermiso(Usuario usuario, Permiso permiso) {
-        this.usuario = usuario;
+        this.cuit = usuario;
         this.permiso = permiso;
         this.fechaAsignacion = LocalDateTime.now();
     }
 
     // Getters y Setters
     public Usuario getUsuario() {
-        return usuario;
+        return cuit;
     }
 
     public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
+        this.cuit = usuario;
     }
 
     public Permiso getPermiso() {
@@ -69,12 +69,12 @@ public class UsuarioPermiso {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UsuarioPermiso that = (UsuarioPermiso) o;
-        return Objects.equals(usuario, that.usuario) && Objects.equals(permiso, that.permiso);
+        return Objects.equals(cuit, that.cuit) && Objects.equals(permiso, that.permiso);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(usuario, permiso);
+        return Objects.hash(cuit, permiso);
     }
 
     /**
@@ -82,13 +82,13 @@ public class UsuarioPermiso {
      * Necesaria para @IdClass que permite usar múltiples @Id en JPA.
      */
     public static class UsuarioPermisoId implements Serializable {
-        private Long usuario;
+        private String cuit;
         private Long permiso;
 
         public UsuarioPermisoId() {}
 
-        public UsuarioPermisoId(Long usuario, Long permiso) {
-            this.usuario = usuario;
+        public UsuarioPermisoId(String cuit, Long permiso) {
+            this.cuit = cuit;
             this.permiso = permiso;
         }
 
@@ -97,12 +97,12 @@ public class UsuarioPermiso {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             UsuarioPermisoId that = (UsuarioPermisoId) o;
-            return Objects.equals(usuario, that.usuario) && Objects.equals(permiso, that.permiso);
+            return Objects.equals(cuit, that.cuit) && Objects.equals(permiso, that.permiso);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(usuario, permiso);
+            return Objects.hash(cuit, permiso);
         }
     }
 }

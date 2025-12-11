@@ -12,13 +12,13 @@ import java.util.Optional;
 @Repository
 public interface UsuarioPermisoRepository extends JpaRepository<UsuarioPermiso, UsuarioPermiso.UsuarioPermisoId> {
     
-    List<UsuarioPermiso> findByUsuario(Usuario usuario);
+    List<UsuarioPermiso> findByCuit(Usuario usuario);
     
     List<UsuarioPermiso> findByPermiso(Permiso permiso);
     
-    Optional<UsuarioPermiso> findByUsuarioAndPermiso(Usuario usuario, Permiso permiso);
+    Optional<UsuarioPermiso> findByCuitAndPermiso(Usuario usuario, Permiso permiso);
     
-    boolean existsByUsuarioAndPermiso(Usuario usuario, Permiso permiso);
+    boolean existsByCuitAndPermiso(Usuario usuario, Permiso permiso);
     
-    void deleteByUsuarioAndPermiso(Usuario usuario, Permiso permiso);
+    void deleteByCuitAndPermiso(Usuario usuario, Permiso permiso);
 }

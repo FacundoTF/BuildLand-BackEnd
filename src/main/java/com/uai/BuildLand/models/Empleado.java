@@ -9,13 +9,14 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "empleados")
 public class Empleado {
-    @OneToOne
-    @JoinColumn(name = "id_usuario")
-    private Usuario usuario;
-    
     @Id
     @Column(name = "cuit", length = 11)
     private String cuit;
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "cuit")
+    private Usuario usuario;
     
     @Column(nullable = false, length = 100)
     private String nombre;

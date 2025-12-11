@@ -7,7 +7,7 @@ import com.uai.BuildLand.models.auth.Usuario;
 
 import java.util.Optional;
 
-public interface UsuarioRepository extends CrudRepository<Usuario, Long>, PagingAndSortingRepository<Usuario, Long> {
+public interface UsuarioRepository extends CrudRepository<Usuario, String>, PagingAndSortingRepository<Usuario, String> {
     boolean existsByEmailAndPassword(String email, String password);
     Optional<Usuario> findByEmail(String coreeo);
 }

@@ -66,10 +66,10 @@ public class DistribuidoraController {
 
         boolean validarDatos = verificarDatosInternos(distribuidora);
         boolean existePorNombre = distribuidoraRepository.existsByNombreIgnoreCase(distribuidora.getNombre());
-        boolean existePorCuit = distribuidoraRepository.existsById(distribuidora.getCuit());
+//        boolean existePorCuit = distribuidoraRepository.existsById(distribuidora.getCuit());
         Optional<Usuario> existePorMail = usuarioRepository.findByEmail(distribuidora.getUsuario().getEmail());
 
-        if (existePorNombre || existePorCuit || existePorMail.isPresent()) {
+        if (existePorNombre || existePorMail.isPresent()) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -83,14 +83,15 @@ public class DistribuidoraController {
             URI uri = ucb.path("/distribuidoras/{cuit}").buildAndExpand(distribuidoraGuardada.getCuit()).toUri();
             return ResponseEntity.created(uri).body(distribuidoraGuardada);
         }catch(Exception e){
+            System.out.println(e);
             return ResponseEntity.badRequest().build();
         }
     }
 
     private boolean verificarDatosInternos(Distribuidora distribuidora) {
-        if (distribuidora.getCuit() == null || distribuidora.getCuit().trim().isEmpty() || distribuidora.getCuit().length() != 11) {
-            return false;
-        }
+//        if (distribuidora.getCuit() == null || distribuidora.getCuit().trim().isEmpty() || distribuidora.getCuit().length() != 11) {
+//            return false;
+//        }
 
         if (distribuidora.getNombre() == null || distribuidora.getNombre().trim().isEmpty() || distribuidora.getNombre().length() > 100) {
             return false;

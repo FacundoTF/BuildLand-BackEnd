@@ -6,19 +6,21 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "personas_fisicas")
 public class PersonaFisica {
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id_usuario")
-    private Usuario usuario;
-
     @Id
     @Column(name = "cuit", length = 11)
     private String cuit;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @MapsId
+    @JoinColumn(name = "cuit")
+    private Usuario usuario;
 
     @Column(nullable = false, length = 100)
     private String nombre;
@@ -97,7 +99,7 @@ public class PersonaFisica {
     @Override
     public String toString() {
         return "PersonaFisica{" +
-                ", usuario=" + (usuario != null ? usuario.getId() : "null") +
+                ", usuario=" + (usuario != null ? usuario.getCuit() : "null") +
                 ", cuit='" + cuit + '\'' +
                 ", nombre='" + nombre + '\'' +
                 ", numeroTelefono='" + numeroTelefono + '\'' +

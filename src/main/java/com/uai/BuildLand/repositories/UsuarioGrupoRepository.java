@@ -11,14 +11,14 @@ import java.util.Optional;
 
 @Repository
 public interface UsuarioGrupoRepository extends JpaRepository<UsuarioGrupo, UsuarioGrupo.UsuarioGrupoId> {
-    
-    List<UsuarioGrupo> findByUsuario(Usuario usuario);
+
+    List<UsuarioGrupo> findByCuit(Usuario usuario);
     
     List<UsuarioGrupo> findByGrupo(Grupo grupo);
     
-    Optional<UsuarioGrupo> findByUsuarioAndGrupo(Usuario usuario, Grupo grupo);
+    Optional<UsuarioGrupo> findByCuitAndGrupo(Usuario usuario, Grupo grupo);
     
-    boolean existsByUsuarioAndGrupo(Usuario usuario, Grupo grupo);
+    boolean existsByCuitAndGrupo(Usuario usuario, Grupo grupo);
     
-    void deleteByUsuarioAndGrupo(Usuario usuario, Grupo grupo);
+    void deleteByCuitAndGrupo(Usuario usuario, Grupo grupo);
 }

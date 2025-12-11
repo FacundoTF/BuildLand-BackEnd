@@ -17,8 +17,8 @@ public class UsuarioGrupo {
     
     @Id
     @ManyToOne
-    @JoinColumn(name = "id_usuario", nullable = false)
-    private Usuario usuario;
+    @JoinColumn(name = "cuit", nullable = false, referencedColumnName = "cuit", columnDefinition = "varchar(11)")
+    private Usuario cuit;
 
     @Id
     @ManyToOne
@@ -28,24 +28,29 @@ public class UsuarioGrupo {
     @Column(name = "fecha_asignacion")
     private LocalDateTime fechaAsignacion;
 
+    @PrePersist
+    protected void onCreate() {
+        this.fechaAsignacion = LocalDateTime.now();
+    }
+
     // Constructores
     public UsuarioGrupo() {
         this.fechaAsignacion = LocalDateTime.now();
     }
 
     public UsuarioGrupo(Usuario usuario, Grupo grupo) {
-        this.usuario = usuario;
+        this.cuit = usuario;
         this.grupo = grupo;
         this.fechaAsignacion = LocalDateTime.now();
     }
 
     // Getters y Setters
     public Usuario getUsuario() {
-        return usuario;
+        return cuit;
     }
 
     public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
+        this.cuit = usuario;
     }
 
     public Grupo getGrupo() {
@@ -69,12 +74,12 @@ public class UsuarioGrupo {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UsuarioGrupo that = (UsuarioGrupo) o;
-        return Objects.equals(usuario, that.usuario) && Objects.equals(grupo, that.grupo);
+        return Objects.equals(cuit, that.cuit) && Objects.equals(grupo, that.grupo);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(usuario, grupo);
+        return Objects.hash(cuit, grupo);
     }
 
     /**
@@ -82,13 +87,13 @@ public class UsuarioGrupo {
      * Necesaria para @IdClass que permite usar múltiples @Id en JPA.
      */
     public static class UsuarioGrupoId implements Serializable {
-        private Long usuario;
+        private String cuit;
         private Long grupo;
 
         public UsuarioGrupoId() {}
 
-        public UsuarioGrupoId(Long usuario, Long grupo) {
-            this.usuario = usuario;
+        public UsuarioGrupoId(String cuit, Long grupo) {
+            this.cuit = cuit;
             this.grupo = grupo;
         }
 
@@ -97,12 +102,12 @@ public class UsuarioGrupo {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             UsuarioGrupoId that = (UsuarioGrupoId) o;
-            return Objects.equals(usuario, that.usuario) && Objects.equals(grupo, that.grupo);
+            return Objects.equals(cuit, that.cuit) && Objects.equals(grupo, that.grupo);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(usuario, grupo);
+            return Objects.hash(cuit, grupo);
         }
     }
 }

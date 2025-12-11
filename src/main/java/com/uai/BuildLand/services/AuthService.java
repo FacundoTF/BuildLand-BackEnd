@@ -50,7 +50,7 @@ public class AuthService {
         Usuario usuario = usuarioRepository.findByEmail(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        List<String> grupos = usuarioGrupoRepository.findByUsuario(usuario)
+        List<String> grupos = usuarioGrupoRepository.findByCuit(usuario)
                 .stream()
                 .map(ug -> ug.getGrupo().getNombre())
                 .collect(Collectors.toList());
@@ -58,7 +58,7 @@ public class AuthService {
         HashSet<String> permisosSet = new HashSet<>();
 
         if(!grupos.isEmpty()){
-            List<String> permisosGrupos = usuarioGrupoRepository.findByUsuario(usuario)
+            List<String> permisosGrupos = usuarioGrupoRepository.findByCuit(usuario)
                     .stream()
                     .flatMap(ug -> ug.getGrupo().getPermisos().stream())
                     .map(p -> p.getNombre())
@@ -67,7 +67,7 @@ public class AuthService {
             permisosSet.addAll(permisosGrupos);
         }
 
-        List<String> permisosUsuario = usuarioPermisoRepository.findByUsuario(usuario)
+        List<String> permisosUsuario = usuarioPermisoRepository.findByCuit(usuario)
                 .stream()
                 .map(up -> up.getPermiso().getNombre())
                 .collect(Collectors.toList());

@@ -1,10 +1,7 @@
 package com.uai.BuildLand.services;
 
 //import com.evoila.jwt.repository.UserRepository;
-import com.uai.BuildLand.models.access.Permiso;
-import com.uai.BuildLand.models.auth.AuthUsuario;
 import com.uai.BuildLand.models.auth.Usuario;
-import com.uai.BuildLand.models.dto.AuthUserInfoDto;
 import com.uai.BuildLand.repositories.UsuarioRepository;
 import com.uai.BuildLand.repositories.UsuarioGrupoRepository;
 import com.uai.BuildLand.repositories.UsuarioPermisoRepository;
@@ -48,7 +45,7 @@ public class AuthUserDetailsService implements UserDetailsService {
     }
 
     private List<String> getUserPermissions(Usuario usuario) {
-        List<String> grupos = usuarioGrupoRepository.findByUsuario(usuario)
+        List<String> grupos = usuarioGrupoRepository.findByCuit(usuario)
                 .stream()
                 .map(ug -> ug.getGrupo().getNombre())
                 .collect(Collectors.toList());
@@ -56,7 +53,7 @@ public class AuthUserDetailsService implements UserDetailsService {
         HashSet<String> permisosSet = new HashSet<>();
 
         if(!grupos.isEmpty()){
-            List<String> permisosGrupos = usuarioGrupoRepository.findByUsuario(usuario)
+            List<String> permisosGrupos = usuarioGrupoRepository.findByCuit(usuario)
                     .stream()
                     .flatMap(ug -> ug.getGrupo().getPermisos().stream())
                     .map(p -> p.getNombre())
@@ -65,7 +62,7 @@ public class AuthUserDetailsService implements UserDetailsService {
             permisosSet.addAll(permisosGrupos);
         }
 
-        List<String> permisosUsuario = usuarioPermisoRepository.findByUsuario(usuario)
+        List<String> permisosUsuario = usuarioPermisoRepository.findByCuit(usuario)
                 .stream()
                 .map(up -> up.getPermiso().getNombre())
                 .collect(Collectors.toList());

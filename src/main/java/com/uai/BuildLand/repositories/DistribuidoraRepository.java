@@ -1,5 +1,6 @@
 package com.uai.BuildLand.repositories;
 
+import com.uai.BuildLand.models.auth.Usuario;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
@@ -17,7 +18,7 @@ public interface DistribuidoraRepository extends CrudRepository<Distribuidora, S
     //  * @param correoElectronico Correo electrónico a buscar
     //  * @return true si existe una distribuidora con ese correo, false en caso contrario
     //  */
-//     boolean existsByUsuarioCorreoElectronicoIgnoreCase(String correoElectronico);
+     boolean existsByUsuario(Usuario correoElectronico);
     
     /**
      * Busca una distribuidora por CUIT (campo id)
