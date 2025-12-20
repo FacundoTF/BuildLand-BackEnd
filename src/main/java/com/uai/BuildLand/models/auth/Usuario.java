@@ -10,7 +10,7 @@ import jakarta.persistence.*;
 @Table(name = "usuarios")
 public class Usuario {
     @Id
-    @Column(name = "cuit", length = 11)
+    @Column(name = "cuit", nullable = false, length = 11)
     private String cuit;
 
     @Enumerated(EnumType.STRING)
