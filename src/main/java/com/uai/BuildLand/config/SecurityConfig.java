@@ -2,6 +2,7 @@ package com.uai.BuildLand.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -39,7 +40,15 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/auth/restorePassword").permitAll();
                     auth.requestMatchers("/api/auth/verifyPasswordCode").permitAll();
                     auth.requestMatchers("/api/auth/changePassword").permitAll();
-                    auth.requestMatchers("/api/categorias").hasAnyAuthority("Z-Pr", "A-DI");
+                    auth.requestMatchers("/api/categorias").hasAnyAuthority("Z-Pr", "A-Di");
+                    auth.requestMatchers(HttpMethod.POST, "/api/distribuidoras").hasAuthority("A-Di");
+                    auth.requestMatchers(HttpMethod.PATCH, "/api/distribuidoras").hasAuthority("M-Di");
+                    auth.requestMatchers(HttpMethod.DELETE, "/api/distribuidoras").hasAuthority("R-Di");
+                    auth.requestMatchers(HttpMethod.POST, "/api/personas-fisicas").hasAuthority("A-Pf");
+                    auth.requestMatchers(HttpMethod.PATCH, "/api/personas-fisicas").hasAuthority("M-Pf");
+                    auth.requestMatchers(HttpMethod.DELETE, "/api/personas-fisicas").hasAuthority("R-Pf");
+                    auth.requestMatchers(HttpMethod.POST, "/api/presupuestos").hasAuthority("Z-Pr");
+                    auth.requestMatchers(HttpMethod.GET, "/api/presupuestos/enlistar").hasAuthority("Y-Pr");
                     auth.anyRequest().authenticated();
                 })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
