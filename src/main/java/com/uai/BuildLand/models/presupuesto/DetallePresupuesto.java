@@ -63,4 +63,12 @@ public class DetallePresupuesto {
     public void setCantidad(double cantidad) {
         this.cantidad = cantidad;
     }
+
+    public Long getId() {
+        return idDetallePresupuesto;
+    }
+
+    public void setId(Long idDetallePresupuesto) {
+        this.idDetallePresupuesto = idDetallePresupuesto;
+    }
 }

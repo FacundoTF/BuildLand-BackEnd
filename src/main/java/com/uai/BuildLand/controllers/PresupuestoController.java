@@ -4,6 +4,7 @@ import com.uai.BuildLand.controllers.specifications.PresupuestoSpecs;
 import com.uai.BuildLand.models.*;
 import com.uai.BuildLand.models.auth.Usuario;
 import com.uai.BuildLand.models.cotizacion.Cotizacion;
+import com.uai.BuildLand.models.dto.PaginationResultDto;
 import com.uai.BuildLand.models.presupuesto.DetallePresupuesto;
 import com.uai.BuildLand.models.presupuesto.Presupuesto;
 import com.uai.BuildLand.repositories.*;
@@ -15,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -37,8 +37,10 @@ public class PresupuestoController {
     private final DistribuidoraRepository distribuidoraRepository;
     private final JwtTokenService jwtTokenService;
     private final UsuarioRepository usuarioRepository;
+    private final DetallePresupuestoRepository detallePresupuestoRepository;
 
-    public PresupuestoController(PresupuestoRepository presupuestoRepository, ProductoRepository productoRepository, MarcaRepository marcaRepository, EmailService emailService, DistribuidoraRepository distribuidoraRepository, JwtTokenService jwtTokenService, UsuarioRepository usuarioRepository) {
+    public PresupuestoController(PresupuestoRepository presupuestoRepository, ProductoRepository productoRepository, MarcaRepository marcaRepository, EmailService emailService, DistribuidoraRepository distribuidoraRepository, JwtTokenService jwtTokenService, UsuarioRepository usuarioRepository, DetallePresupuestoRepository detallePresupuestoRepository) {
+        this.detallePresupuestoRepository = detallePresupuestoRepository;
         this.jwtTokenService = jwtTokenService;
         this.presupuestoRepository = presupuestoRepository;
         this.productoRepository = productoRepository;
@@ -154,14 +156,14 @@ public class PresupuestoController {
     }
 
     @GetMapping("/enlistar")
-    public ResponseEntity<List<Presupuesto>> enlistar(Pageable pageable, @RequestParam String cuit, @CookieValue (name = "accessToken") String jwtToken) {
-//        String correo = jwtTokenService.extractUsername(jwtToken);
-//        Optional<Usuario> usuario = usuarioRepository.findByEmail(correo);
-//        if (usuario.isEmpty()) {
-//            return ResponseEntity.status(401).build();
-//        }
+    public ResponseEntity<PaginationResultDto> enlistar(Pageable pageable, @CookieValue (name = "accessToken") String jwtToken) {
+        String correo = jwtTokenService.extractUsername(jwtToken);
+        Optional<Usuario> usuario = usuarioRepository.findByEmail(correo);
+        if (usuario.isEmpty()) {
+            return ResponseEntity.status(401).build();
+        }
         // Obtener la distribuidora por CUIT
-        Optional<Distribuidora> distribuidoraOpt = distribuidoraRepository.findById(cuit);
+        Optional<Distribuidora> distribuidoraOpt = distribuidoraRepository.findById(usuario.get().getCuit());
         if (distribuidoraOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -171,7 +173,7 @@ public class PresupuestoController {
 
         // Si la distribuidora no tiene categorías, retornar lista vacía
         if (categoriasDistribuidora == null || categoriasDistribuidora.isEmpty()) {
-            return ResponseEntity.ok(new ArrayList<>());
+            return ResponseEntity.ok(new PaginationResultDto(new ArrayList<>(), false, false));
         }
 
         // Crear una especificación para filtrar presupuestos por las categorías de la distribuidora
@@ -183,6 +185,24 @@ public class PresupuestoController {
                 pageable.getPageSize(),
                 pageable.getSortOr(Sort.by(Sort.Direction.DESC, "fecha"))));
 
-        return ResponseEntity.ok(presupuestos.getContent());
+        if (presupuestos.getContent().isEmpty()){
+            return ResponseEntity.status(404).build();
+        }
+
+        return ResponseEntity.ok(new PaginationResultDto(presupuestos.getContent(), presupuestos.hasPrevious(), presupuestos.hasNext()));
+    }
+
+    @GetMapping("/detalles/{id}/enlistar")
+    public ResponseEntity<PaginationResultDto> enlistarDetalles(Pageable pageable, @PathVariable Long id, @CookieValue (name = "accessToken") String jwtToken) {
+        String correo = jwtTokenService.extractUsername(jwtToken);
+        Page<DetallePresupuesto> detallesOpt = detallePresupuestoRepository.findAllByPresupuesto_IdPresupuesto(id, PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                pageable.getSortOr(Sort.by(Sort.Direction.DESC, "idDetallePresupuesto"))
+        ));
+        if (detallesOpt.getContent().isEmpty()){
+            return ResponseEntity.status(404).build();
+        }
+        return ResponseEntity.ok(new PaginationResultDto(detallesOpt.getContent(), detallesOpt.hasPrevious(), detallesOpt.hasNext()));
     }
 }

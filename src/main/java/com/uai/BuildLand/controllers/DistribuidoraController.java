@@ -128,12 +128,18 @@ public class DistribuidoraController {
     public ResponseEntity<Distribuidora> actualizar(@RequestBody Distribuidora distribuidora) {
         String nonNullCuit = Objects.requireNonNull(distribuidora.getCuit(), "cuit must not be null");
         Optional<Distribuidora> distribuidoraDesactualizada = distribuidoraRepository.findById(nonNullCuit);
-        if (distribuidoraDesactualizada.isPresent()) {
-            distribuidoraRepository.save(distribuidora);
-            return ResponseEntity.ok(distribuidora);
-        } else {
-            return ResponseEntity.notFound().build();
+        try{
+            if (distribuidoraDesactualizada.isPresent()) {
+                distribuidoraRepository.save(distribuidora);
+                return ResponseEntity.ok(distribuidora);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        }catch(Exception e){
+            System.out.println(e);
+            return ResponseEntity.badRequest().build();
         }
+
     }
 
     /**
