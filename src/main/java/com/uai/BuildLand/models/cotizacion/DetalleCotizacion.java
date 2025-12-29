@@ -18,7 +18,7 @@ public class DetalleCotizacion {
     @Column(name = "precio_unitario", nullable = false)
     private double precioUnitario;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cotizacion_id", nullable = false)
     private Cotizacion cotizacion;
 

@@ -2,15 +2,7 @@ package com.uai.BuildLand.models.cotizacion;
 
 import com.uai.BuildLand.models.Distribuidora;
 import com.uai.BuildLand.models.presupuesto.Presupuesto;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.util.Date;
 import java.util.List;
@@ -23,7 +15,7 @@ public class Cotizacion {
     @Column(name = "id_cotizacion")
     private Long idCotizacion;
 
-    @OneToMany(mappedBy = "idDetalleCotizacion", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "idDetalleCotizacion", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<DetalleCotizacion> detalles;
 
     @ManyToOne
