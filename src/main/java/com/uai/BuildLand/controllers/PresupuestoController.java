@@ -1,7 +1,10 @@
 package com.uai.BuildLand.controllers;
 
 import com.uai.BuildLand.controllers.specifications.PresupuestoSpecs;
-import com.uai.BuildLand.models.*;
+import com.uai.BuildLand.models.Categoria;
+import com.uai.BuildLand.models.Distribuidora;
+import com.uai.BuildLand.models.Marca;
+import com.uai.BuildLand.models.Producto;
 import com.uai.BuildLand.models.auth.Usuario;
 import com.uai.BuildLand.models.cotizacion.Cotizacion;
 import com.uai.BuildLand.models.dto.PaginationResultDto;
@@ -78,6 +81,7 @@ public class PresupuestoController {
                 if (!valido) {
                     return ResponseEntity.badRequest().build();
                 }
+                detalle.setId(null);
             }
             detalle.setPresupuesto(presupuesto);
         }
@@ -204,5 +208,11 @@ public class PresupuestoController {
             return ResponseEntity.status(404).build();
         }
         return ResponseEntity.ok(new PaginationResultDto(detallesOpt.getContent(), detallesOpt.hasPrevious(), detallesOpt.hasNext()));
+    }
+
+    @GetMapping("/detalles/{id}/cotizar")
+    public ResponseEntity<List<DetallePresupuesto>> obtenerDetallesParaCotizar(@PathVariable Long id) {
+        Optional<List<DetallePresupuesto>> detalles = detallePresupuestoRepository.findAllByPresupuesto_IdPresupuesto(id);
+        return detalles.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

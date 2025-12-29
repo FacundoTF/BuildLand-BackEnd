@@ -7,11 +7,14 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import com.uai.BuildLand.models.Distribuidora;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DistribuidoraRepository extends CrudRepository<Distribuidora, String>, PagingAndSortingRepository<Distribuidora, String> {
     boolean existsByNombreIgnoreCase(String nombre);
 
     List<Distribuidora> findByCategoriasNombre(String nombre);
+
+    Optional<Distribuidora> findByUsuario_Email(String usuarioEmail);
 
     // /**
     //  * Busca distribuidoras por correo electrónico del usuario asociado (case insensitive)

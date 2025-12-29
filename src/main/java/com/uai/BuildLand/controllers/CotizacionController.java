@@ -1,7 +1,12 @@
 package com.uai.BuildLand.controllers;
 
+import com.uai.BuildLand.models.Distribuidora;
+import com.uai.BuildLand.models.Marca;
+import com.uai.BuildLand.models.Producto;
 import com.uai.BuildLand.models.cotizacion.Cotizacion;
-import com.uai.BuildLand.repositories.CotizacionRepository;
+import com.uai.BuildLand.models.cotizacion.DetalleCotizacion;
+import com.uai.BuildLand.repositories.*;
+import com.uai.BuildLand.services.JwtTokenService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,8 +26,16 @@ import java.util.Optional;
 public class CotizacionController {
 
     private final CotizacionRepository cotizacionRepository;
+    private final JwtTokenService jwtTokenService;
+    private final DistribuidoraRepository distribuidoraRepository;
+    private final PresupuestoRepository presupuestoRepository;
+    private final ProductoRepository productoRepository;
 
-    public CotizacionController(CotizacionRepository cotizacionRepository) {
+    public CotizacionController(CotizacionRepository cotizacionRepository, JwtTokenService jwtTokenService, DistribuidoraRepository distribuidoraRepository, PresupuestoRepository presupuestoRepository, ProductoRepository productoRepository) {
+        this.productoRepository = productoRepository;
+        this.presupuestoRepository = presupuestoRepository;
+        this.distribuidoraRepository = distribuidoraRepository;
+        this.jwtTokenService = jwtTokenService;
         this.cotizacionRepository = cotizacionRepository;
     }
 
@@ -32,15 +45,27 @@ public class CotizacionController {
         return cotizacion.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public ResponseEntity<Cotizacion> crear(@RequestBody Cotizacion cotizacion, UriComponentsBuilder ucb) {
+    @PostMapping("/{idPresupuesto}")
+    public ResponseEntity<Cotizacion> crear(@RequestBody Cotizacion cotizacion, @PathVariable Long idPresupuesto, @CookieValue (name = "accessToken") String jwtToken, UriComponentsBuilder ucb) {
+        String correo = jwtTokenService.extractUsername(jwtToken);
+        Optional<Distribuidora> distribuidoraOpt = distribuidoraRepository.findByUsuario_Email(correo);
+        if (distribuidoraOpt.isEmpty()) {
+            return ResponseEntity.status(403).build();
+        }
+        for (DetalleCotizacion detalle : cotizacion.getDetalles()) {
+            Optional<Producto> productoOpt = productoRepository.findByNombre(detalle.getProducto().getNombre());
+            if (productoOpt.isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+            detalle.setProducto(productoOpt.get());
+            detalle.setCotizacion(cotizacion);
+        }
+        cotizacion.setPresupuesto(presupuestoRepository.findById(idPresupuesto).orElse(null));
+        cotizacion.setDistribuidora(distribuidoraOpt.get());
         if (cotizacion.getPresupuesto() == null || cotizacion.getDistribuidora() == null) {
             return ResponseEntity.badRequest().build();
         }
-
         cotizacion.setFecha(new Date());
-        cotizacion.getDetalles().forEach(detalle -> detalle.setCotizacion(cotizacion));
-
         Cotizacion cotizacionGuardada = cotizacionRepository.save(cotizacion);
         URI uri = ucb.path("/cotizaciones/{id}").buildAndExpand(cotizacionGuardada.getId()).toUri();
         return ResponseEntity.created(uri).body(cotizacionGuardada);
