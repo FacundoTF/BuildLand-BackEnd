@@ -87,6 +87,12 @@ public class PresupuestoController {
         }
 
         presupuesto.setFecha(new Date());
+
+        Date fechaVencimiento = new Date();
+        fechaVencimiento.setTime(presupuesto.getFecha().getTime() + (7 * 24 * 60 * 60 * 1000));
+//        fechaVencimiento.setTime(presupuesto.getFecha().getTime() + (3 * 60 * 1000)); // 3 minutos para pruebas
+        presupuesto.setFechaLimite(fechaVencimiento);
+
         presupuesto.setCotizaciones(new ArrayList<Cotizacion>());
 
         Presupuesto presupuestoGuardado = presupuestoRepository.save(presupuesto);
