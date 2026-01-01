@@ -68,6 +68,8 @@ public class CotizacionController {
         cotizacion.setFecha(new Date());
         Cotizacion cotizacionGuardada = cotizacionRepository.save(cotizacion);
         URI uri = ucb.path("/cotizaciones/{id}").buildAndExpand(cotizacionGuardada.getId()).toUri();
+        cotizacionGuardada.setPresupuesto(null);
+        cotizacionGuardada.setDetalles(null);
         return ResponseEntity.created(uri).body(cotizacionGuardada);
     }
 
