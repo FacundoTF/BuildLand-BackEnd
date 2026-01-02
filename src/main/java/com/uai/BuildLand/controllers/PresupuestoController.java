@@ -188,6 +188,8 @@ public class PresupuestoController {
 
         // Crear una especificación para filtrar presupuestos por las categorías de la distribuidora
         Specification<Presupuesto> spec = PresupuestoSpecs.categoriasIn(categoriasDistribuidora);
+        Specification<Presupuesto> fechaLimiteSpec = PresupuestoSpecs.fechaLimiteBefore(new Date());
+        spec = spec.and(fechaLimiteSpec);
 
         // Obtener los presupuestos filtrados con paginación y orden por fecha descendente
         Page<Presupuesto> presupuestos = presupuestoRepository.findAll(spec, PageRequest.of(

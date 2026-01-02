@@ -16,4 +16,12 @@ public class PresupuestoSpecs {
             return root.get("categoria").in(categorias);
         };
     }
+    public static Specification<Presupuesto> fechaLimiteBefore(java.util.Date fecha) {
+        return (root, query, builder) -> {
+            if (fecha == null) {
+                return builder.conjunction();
+            }
+            return builder.greaterThanOrEqualTo(root.get("fechaLimite"), fecha);
+        };
+    }
 }
