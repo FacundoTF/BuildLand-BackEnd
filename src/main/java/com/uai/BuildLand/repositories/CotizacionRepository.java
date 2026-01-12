@@ -6,6 +6,7 @@ import com.uai.BuildLand.models.cotizacion.DetalleCotizacion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
@@ -36,5 +37,9 @@ public interface CotizacionRepository extends JpaRepository<Cotizacion, Long> {
 
     @Query("SELECT dc FROM DetalleCotizacion dc WHERE dc.cotizacion.idCotizacion IN :cotizacionIds")
     List<DetalleCotizacion> findDetallesByCotizacionIds(@Param("cotizacionIds") List<Long> cotizacionIds);
+
+    @Query(value = "EXEC dbo.sp_NotificarDesplazamiento :IdPresupuesto, :email", nativeQuery = true)
+    @Async
+    void notificarDesplazamiento(@Param("IdPresupuesto") Long IdPresupuesto, @Param("email") String email);
 
 }

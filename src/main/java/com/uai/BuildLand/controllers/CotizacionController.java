@@ -66,6 +66,9 @@ public class CotizacionController {
         }
         cotizacion.setFecha(new Date());
         Cotizacion cotizacionGuardada = cotizacionRepository.save(cotizacion);
+
+        this.cotizacionRepository.notificarDesplazamiento(idPresupuesto, distribuidoraOpt.get().getUsuario().getEmail());
+
         URI uri = ucb.path("/cotizaciones/{id}").buildAndExpand(cotizacionGuardada.getId()).toUri();
         cotizacionGuardada.setPresupuesto(null);
         cotizacionGuardada.setDetalles(null);
