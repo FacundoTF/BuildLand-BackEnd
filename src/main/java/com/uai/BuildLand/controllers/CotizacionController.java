@@ -1,16 +1,15 @@
 package com.uai.BuildLand.controllers;
 
 import com.uai.BuildLand.models.Distribuidora;
-import com.uai.BuildLand.models.Marca;
 import com.uai.BuildLand.models.Producto;
 import com.uai.BuildLand.models.cotizacion.Cotizacion;
+import com.uai.BuildLand.models.cotizacion.CotizacionResumen;
 import com.uai.BuildLand.models.cotizacion.DetalleCotizacion;
+import com.uai.BuildLand.models.dto.CotizacionDto;
+import com.uai.BuildLand.models.dto.DetalleCotizacionDto;
 import com.uai.BuildLand.repositories.*;
 import com.uai.BuildLand.services.JwtTokenService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -108,12 +107,65 @@ public class CotizacionController {
         }
     }
 
-    @GetMapping("/enlistar")
-    public ResponseEntity<List<Cotizacion>> enlistar(Pageable pageable) {
-        Page<Cotizacion> cotizaciones = cotizacionRepository.findAll(PageRequest.of(
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                pageable.getSortOr(Sort.by(Sort.Direction.DESC, "fecha"))));
-        return ResponseEntity.ok(cotizaciones.getContent());
+    @GetMapping("/enlistar/{IdPresupuesto}")
+    public ResponseEntity<List<CotizacionDto>> enlistar(@PathVariable Long IdPresupuesto) {
+        // Obtener el resumen de las 3 mejores cotizaciones (una por distribuidora)
+        List<CotizacionResumen> resumen = cotizacionRepository.findTop3ByPresupuestoIdOrderByImporteTotalDesc(IdPresupuesto);
+
+        if (resumen.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // Extraer los IDs de las cotizaciones
+        List<Long> cotizacionIds = resumen.stream()
+                .map(CotizacionResumen::getIdCotizacion)
+                .toList();
+
+        // Cargar las cotizaciones completas
+        // Se hace el reverse para preservar el orden de menor a mayor importe total, proveniente de 'resumen'
+        List<Cotizacion> cotizaciones = cotizacionRepository.findAllById(cotizacionIds).reversed();
+
+        // Cargar los detalles de las cotizaciones
+        List<DetalleCotizacion> detalles = cotizacionRepository.findDetallesByCotizacionIds(cotizacionIds);
+
+        // Mapear entidades a DTOs
+        List<CotizacionDto> cotizacionDtos = cotizaciones.stream()
+                .map(c -> {
+                    CotizacionDto dto = new CotizacionDto();
+                    dto.setId(c.getId());
+                    dto.setFecha(c.getFecha());
+
+                    // Calcular el importe total de los detalles
+                    List<DetalleCotizacionDto> detallesDto = detalles.stream()
+                            .filter(d -> d.getCotizacion().getId().equals(c.getId()))
+                            .map(d -> {
+                                DetalleCotizacionDto detalleDto = new DetalleCotizacionDto();
+//                                detalleDto.setIdProducto(d.getProducto().getId());
+                                detalleDto.setNombreProducto(d.getProducto().getNombre());
+                                detalleDto.setNombreMarca(d.getProducto().getMarca().getNombre());
+//                                detalleDto.setNombreCategoria(d.getProducto().getCategoria().getNombre());
+                                detalleDto.setImporte(d.getImporte());
+                                return detalleDto;
+                            })
+                            .toList();
+
+                    dto.setDetalles(detallesDto);
+
+                    dto.setImporteTotal(resumen.stream()
+                            .filter(r -> r.getIdCotizacion().equals(c.getId()))
+                            .findFirst()
+                            .map(CotizacionResumen::getMontoTotal)
+                            .orElse(0.0));
+                    // Datos de distribuidora (acceso seguro sin activar proxy lazy)
+                    if (c.getDistribuidora() != null) {
+                        dto.setCuitDistribuidora(c.getDistribuidora().getCuit());
+                        dto.setNombreDistribuidora(c.getDistribuidora().getNombre());
+                    }
+
+                    return dto;
+                })
+                .toList();
+
+        return ResponseEntity.ok(cotizacionDtos);
     }
 }

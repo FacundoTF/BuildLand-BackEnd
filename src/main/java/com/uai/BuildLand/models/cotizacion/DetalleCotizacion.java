@@ -16,15 +16,15 @@ public class DetalleCotizacion {
     private Producto producto;
 
     @Column(name = "precio_unitario", nullable = false)
-    private double precioUnitario;
+    private double importe;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cotizacion_id", nullable = false)
     private Cotizacion cotizacion;
 
-    public DetalleCotizacion(Producto producto, double precioUnitario, Cotizacion cotizacion) {
+    public DetalleCotizacion(Producto producto, double importe, Cotizacion cotizacion) {
         this.producto = producto;
-        this.precioUnitario = precioUnitario;
+        this.importe = importe;
         this.cotizacion = cotizacion;
     }
 
@@ -40,12 +40,12 @@ public class DetalleCotizacion {
         this.producto = producto;
     }
 
-    public double getPrecioUnitario() {
-        return precioUnitario;
+    public double getImporte() {
+        return importe;
     }
 
-    public void setPrecioUnitario(double precioUnitario) {
-        this.precioUnitario = precioUnitario;
+    public void setImporte(double importe) {
+        this.importe = importe;
     }
 
     public Cotizacion getCotizacion() {
