@@ -49,6 +49,7 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.DELETE, "/api/personas-fisicas").hasAuthority("R-Pf");
                     auth.requestMatchers(HttpMethod.POST, "/api/presupuestos").hasAuthority("Z-Pr");
                     auth.requestMatchers(HttpMethod.GET, "/api/presupuestos/enlistar").hasAuthority("Y-Pr");
+                    auth.requestMatchers(HttpMethod.GET, "/api/usuarios").authenticated();
                     auth.anyRequest().authenticated();
                 })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

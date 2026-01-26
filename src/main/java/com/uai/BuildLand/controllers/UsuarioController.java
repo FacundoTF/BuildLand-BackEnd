@@ -1,5 +1,6 @@
 package com.uai.BuildLand.controllers;
 
+import com.uai.BuildLand.services.JwtTokenService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,20 +26,18 @@ import java.util.Objects;
 @CrossOrigin(origins = "*")
 public class UsuarioController {
     private final UsuarioRepository usuarioRepository;
+    private final JwtTokenService jwtTokenService;
 
-    public UsuarioController(UsuarioRepository usuarioRepository) {
+    public UsuarioController(UsuarioRepository usuarioRepository, JwtTokenService jwtTokenService) {
+        this.jwtTokenService = jwtTokenService;
         this.usuarioRepository = usuarioRepository;
     }
 
-    /**
-     * Obtiene un usuario por CUIT
-     * @param cuit CUIT del usuario
-     * @return Usuario encontrado o 404 si no existe
-     */
-    @GetMapping("/{cuit}")
-    public ResponseEntity<Usuario> obtenerPorId(@PathVariable String cuit) {
-        String nonNullCuit = Objects.requireNonNull(cuit, "cuit must not be null");
-        Optional<Usuario> usuario = usuarioRepository.findById(nonNullCuit);
+    @GetMapping()
+    public ResponseEntity<Usuario> obtenerPorId(@CookieValue("accessToken") String accessToken) {
+        String tokenNoNulo = Objects.requireNonNull(accessToken, "accessToken must not be null");
+        String correo = jwtTokenService.extractUsername(tokenNoNulo);
+        Optional<Usuario> usuario = usuarioRepository.findByEmail(correo);
         if (usuario.isPresent()) {
             return ResponseEntity.ok(usuario.get());
         } else {
