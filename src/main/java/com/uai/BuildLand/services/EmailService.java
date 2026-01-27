@@ -3,12 +3,10 @@ package com.uai.BuildLand.services;
 import com.uai.BuildLand.models.Distribuidora;
 import com.uai.BuildLand.models.presupuesto.Presupuesto;
 import com.uai.BuildLand.repositories.DistribuidoraRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -48,7 +46,7 @@ public class EmailService {
             // Construir el texto con los detalles del presupuesto
             StringBuilder textoBuilder = new StringBuilder();
             for (var detallePresupuesto : presupuesto.getDetalles()) {
-                textoBuilder.append("\n").append(detallePresupuesto.getProducto().getNombre())
+                textoBuilder.append("\n").append(detallePresupuesto.getProductoMarca().getProducto().getNombre())
                         .append(": ").append((int) detallePresupuesto.getCantidad()).append(" unidades.");
             }
             String texto = textoBuilder.toString();

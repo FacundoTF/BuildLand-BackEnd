@@ -143,10 +143,7 @@ public class CotizacionController {
                             .filter(d -> d.getCotizacion().getId().equals(c.getId()))
                             .map(d -> {
                                 DetalleCotizacionDto detalleDto = new DetalleCotizacionDto();
-//                                detalleDto.setIdProducto(d.getProducto().getId());
                                 detalleDto.setNombreProducto(d.getProducto().getNombre());
-                                detalleDto.setNombreMarca(d.getProducto().getMarca().getNombre());
-//                                detalleDto.setNombreCategoria(d.getProducto().getCategoria().getNombre());
                                 detalleDto.setImporte(d.getImporte());
                                 return detalleDto;
                             })

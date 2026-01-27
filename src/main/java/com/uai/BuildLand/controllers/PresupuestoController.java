@@ -3,8 +3,8 @@ package com.uai.BuildLand.controllers;
 import com.uai.BuildLand.controllers.specifications.PresupuestoSpecs;
 import com.uai.BuildLand.models.Categoria;
 import com.uai.BuildLand.models.Distribuidora;
-import com.uai.BuildLand.models.Marca;
 import com.uai.BuildLand.models.Producto;
+import com.uai.BuildLand.models.ProductoMarca;
 import com.uai.BuildLand.models.auth.Usuario;
 import com.uai.BuildLand.models.cotizacion.Cotizacion;
 import com.uai.BuildLand.models.dto.PaginationResultDto;
@@ -34,20 +34,18 @@ import java.util.Optional;
 public class PresupuestoController {
 
     private final PresupuestoRepository presupuestoRepository;
-    private final ProductoRepository productoRepository;
-    private final MarcaRepository marcaRepository;
+    private final ProductoMarcaRepository productoMarcaRepository;
     private final EmailService emailService;
     private final DistribuidoraRepository distribuidoraRepository;
     private final JwtTokenService jwtTokenService;
     private final UsuarioRepository usuarioRepository;
     private final DetallePresupuestoRepository detallePresupuestoRepository;
 
-    public PresupuestoController(PresupuestoRepository presupuestoRepository, ProductoRepository productoRepository, MarcaRepository marcaRepository, EmailService emailService, DistribuidoraRepository distribuidoraRepository, JwtTokenService jwtTokenService, UsuarioRepository usuarioRepository, DetallePresupuestoRepository detallePresupuestoRepository) {
+    public PresupuestoController(PresupuestoRepository presupuestoRepository, EmailService emailService, DistribuidoraRepository distribuidoraRepository, JwtTokenService jwtTokenService, UsuarioRepository usuarioRepository, DetallePresupuestoRepository detallePresupuestoRepository, ProductoMarcaRepository productoMarcaRepository) {
+        this.productoMarcaRepository = productoMarcaRepository;
         this.detallePresupuestoRepository = detallePresupuestoRepository;
         this.jwtTokenService = jwtTokenService;
         this.presupuestoRepository = presupuestoRepository;
-        this.productoRepository = productoRepository;
-        this.marcaRepository = marcaRepository;
         this.emailService = emailService;
         this.distribuidoraRepository = distribuidoraRepository;
         this.usuarioRepository = usuarioRepository;
@@ -66,22 +64,17 @@ public class PresupuestoController {
         }
 
         for (DetallePresupuesto detalle : presupuesto.getDetalles()) {
-            if (detalle.getProducto() == null) {
+            if (detalle.getProductoMarca() == null) {
                 return ResponseEntity.badRequest().build();
             }else {
-                Optional<Producto> producto = productoRepository.findByNombre((detalle.getProducto().getNombre()));
-                Optional<Marca> marca = marcaRepository.findByNombre((detalle.getProducto().getMarca().getNombre()));
-                if(producto.isEmpty() || marca.isEmpty()) {
+                Optional<ProductoMarca> productoMarca = productoMarcaRepository.findAllByMarca_NombreAndProducto_Nombre(
+                        detalle.getProductoMarca().getMarca().getNombre(),
+                        detalle.getProductoMarca().getProducto().getNombre()
+                );
+                if (productoMarca.isEmpty()){
                     return ResponseEntity.badRequest().build();
                 }
-                detalle.setProducto(producto.get());
-                detalle.getProducto().setMarca(marca.get());
-                boolean valido = verificarDatosInternos(detalle.getProducto(), detalle);
-
-                if (!valido) {
-                    return ResponseEntity.badRequest().build();
-                }
-                detalle.setId(null);
+                detalle.setProductoMarca(productoMarca.get());
             }
             detalle.setPresupuesto(presupuesto);
         }
@@ -101,30 +94,12 @@ public class PresupuestoController {
         try {
             emailService.sendPresupuestoMail(presupuestoGuardado);
         } catch (Exception e) {
-            // Log del error pero no fallar la creación del presupuesto
             System.err.println("Error al enviar email de presupuesto: " + e.getMessage());
         }
 
         URI uri = ucb.path("api/presupuestos/{id}").buildAndExpand(presupuestoGuardado.getId()).toUri();
         return ResponseEntity.created(uri).body(presupuestoGuardado);
     }
-
-    private boolean verificarDatosInternos(Producto producto, DetallePresupuesto detallePresupuesto) {
-        if (detallePresupuesto.getProducto().getMarca() == null) {
-            return false;
-        }
-
-        if (detallePresupuesto.getCantidad() <= 0) {
-            return false;
-        }
-
-        if(detallePresupuesto.getProducto() == null) {
-            return false;
-        }
-
-        return true;
-    }
-
     @PatchMapping("/{id}")
     public ResponseEntity<Presupuesto> actualizar(@PathVariable Long id, @RequestBody Presupuesto presupuestoActualizado) {
         Optional<Presupuesto> presupuestoExistenteOpt = presupuestoRepository.findById(id);
