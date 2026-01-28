@@ -132,6 +132,36 @@ public class PresupuestoController {
         return ResponseEntity.ok(presupuestoGuardado);
     }
 
+    @PostMapping("/rechazar/{id}")
+    public ResponseEntity<Void> rechazarPresupuesto(@PathVariable Long id, @CookieValue (name = "accessToken") String jwtToken) {
+        String correo = jwtTokenService.extractUsername(jwtToken);
+        Optional<Usuario> usuario = usuarioRepository.findByEmail(correo);
+        if (usuario.isEmpty()) {
+            return ResponseEntity.status(401).build();
+        }
+        // Obtener la distribuidora por CUIT
+        Optional<Distribuidora> distribuidoraOpt = distribuidoraRepository.findById(usuario.get().getCuit());
+        if (distribuidoraOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Distribuidora distribuidora = distribuidoraOpt.get();
+
+        Optional<Presupuesto> presupuestoOpt = presupuestoRepository.findById(id);
+        if (presupuestoOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Presupuesto presupuesto = presupuestoOpt.get();
+
+        try {
+            presupuestoRepository.rechazarPresupuesto(presupuesto.getId(), distribuidora.getCuit());
+        } catch(Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         if (presupuestoRepository.existsById(id)) {
