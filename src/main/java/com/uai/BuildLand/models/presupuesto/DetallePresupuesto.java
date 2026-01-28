@@ -15,7 +15,8 @@ public class DetallePresupuesto {
     @Column(name = "id_detalle_presupuesto", nullable = false, updatable = false)
     private Long idDetallePresupuesto;
 
-    @OneToOne
+//    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "id_producto_marca", nullable = false)
     private ProductoMarca productoMarca;
 

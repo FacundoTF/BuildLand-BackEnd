@@ -2,6 +2,7 @@ package com.uai.BuildLand.controllers;
 
 import com.uai.BuildLand.models.Distribuidora;
 import com.uai.BuildLand.models.Producto;
+import com.uai.BuildLand.models.ProductoMarca;
 import com.uai.BuildLand.models.cotizacion.Cotizacion;
 import com.uai.BuildLand.models.cotizacion.CotizacionResumen;
 import com.uai.BuildLand.models.cotizacion.DetalleCotizacion;
@@ -28,14 +29,14 @@ public class CotizacionController {
     private final JwtTokenService jwtTokenService;
     private final DistribuidoraRepository distribuidoraRepository;
     private final PresupuestoRepository presupuestoRepository;
-    private final ProductoRepository productoRepository;
+    private final ProductoMarcaRepository productoMarcaRepository;
 
-    public CotizacionController(CotizacionRepository cotizacionRepository, JwtTokenService jwtTokenService, DistribuidoraRepository distribuidoraRepository, PresupuestoRepository presupuestoRepository, ProductoRepository productoRepository) {
-        this.productoRepository = productoRepository;
+    public CotizacionController(ProductoMarcaRepository productoMarcaRepository,CotizacionRepository cotizacionRepository, JwtTokenService jwtTokenService, DistribuidoraRepository distribuidoraRepository, PresupuestoRepository presupuestoRepository) {
         this.presupuestoRepository = presupuestoRepository;
         this.distribuidoraRepository = distribuidoraRepository;
         this.jwtTokenService = jwtTokenService;
         this.cotizacionRepository = cotizacionRepository;
+        this.productoMarcaRepository = productoMarcaRepository;
     }
 
     @GetMapping("/{id}")
@@ -52,11 +53,14 @@ public class CotizacionController {
             return ResponseEntity.status(403).build();
         }
         for (DetalleCotizacion detalle : cotizacion.getDetalles()) {
-            Optional<Producto> productoOpt = productoRepository.findByNombre(detalle.getProducto().getNombre());
-            if (productoOpt.isEmpty()) {
+            Optional<ProductoMarca> productoMarca = productoMarcaRepository.findAllByMarca_NombreAndProducto_Nombre(
+                    detalle.getProductoMarca().getMarca().getNombre(),
+                    detalle.getProductoMarca().getProducto().getNombre()
+            );
+            if (productoMarca.isEmpty()){
                 return ResponseEntity.badRequest().build();
             }
-            detalle.setProducto(productoOpt.get());
+            detalle.setProductoMarca(productoMarca.get());
             detalle.setCotizacion(cotizacion);
         }
         cotizacion.setPresupuesto(presupuestoRepository.findById(idPresupuesto).orElse(null));
@@ -143,7 +147,7 @@ public class CotizacionController {
                             .filter(d -> d.getCotizacion().getId().equals(c.getId()))
                             .map(d -> {
                                 DetalleCotizacionDto detalleDto = new DetalleCotizacionDto();
-                                detalleDto.setNombreProducto(d.getProducto().getNombre());
+                                detalleDto.setNombreProducto(d.getProductoMarca().getProducto().getNombre());
                                 detalleDto.setImporte(d.getImporte());
                                 return detalleDto;
                             })
