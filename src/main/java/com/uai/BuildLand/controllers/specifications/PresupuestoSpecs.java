@@ -24,4 +24,23 @@ public class PresupuestoSpecs {
             return builder.greaterThanOrEqualTo(root.get("fechaLimite"), fecha);
         };
     }
+
+    public static Specification<Presupuesto> noRechazadoPor(String cuit) {
+        return (root, query, builder) -> {
+            if (cuit == null || cuit.isEmpty()) {
+                return builder.conjunction();
+            }
+            if (query == null) {
+                return builder.conjunction();
+            }
+            // Subquery para obtener presupuestos rechazados por este CUIT
+            var subquery = query.subquery(Long.class);
+            var subqueryRoot = subquery.from(com.uai.BuildLand.models.presupuesto.PresupuestoRechazado.class);
+            subquery.select(subqueryRoot.get("id").get("idPresupuesto"))
+                    .where(builder.equal(subqueryRoot.get("id").get("cuit"), cuit));
+
+            // Excluir presupuestos que están en la subquery
+            return builder.not(root.get("id").in(subquery));
+        };
+    }
 }

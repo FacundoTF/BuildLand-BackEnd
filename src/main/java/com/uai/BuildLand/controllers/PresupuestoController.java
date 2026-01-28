@@ -3,14 +3,13 @@ package com.uai.BuildLand.controllers;
 import com.uai.BuildLand.controllers.specifications.PresupuestoSpecs;
 import com.uai.BuildLand.models.Categoria;
 import com.uai.BuildLand.models.Distribuidora;
-import com.uai.BuildLand.models.Producto;
 import com.uai.BuildLand.models.ProductoMarca;
 import com.uai.BuildLand.models.auth.Usuario;
 import com.uai.BuildLand.models.cotizacion.Cotizacion;
 import com.uai.BuildLand.models.dto.PaginationResultDto;
 import com.uai.BuildLand.models.presupuesto.DetallePresupuesto;
 import com.uai.BuildLand.models.presupuesto.Presupuesto;
-import com.uai.BuildLand.models.presupuesto.PresupuestoRechazado;
+import com.uai.BuildLand.repositories.PresupuestoRechazadoRepository;
 import com.uai.BuildLand.repositories.*;
 import com.uai.BuildLand.services.EmailService;
 import com.uai.BuildLand.services.JwtTokenService;
@@ -42,8 +41,9 @@ public class PresupuestoController {
     private final JwtTokenService jwtTokenService;
     private final UsuarioRepository usuarioRepository;
     private final DetallePresupuestoRepository detallePresupuestoRepository;
+    private final PresupuestoRechazadoRepository presupuestoRechazadoRepository;
 
-    public PresupuestoController(PresupuestoRepository presupuestoRepository, EmailService emailService, DistribuidoraRepository distribuidoraRepository, JwtTokenService jwtTokenService, UsuarioRepository usuarioRepository, DetallePresupuestoRepository detallePresupuestoRepository, ProductoMarcaRepository productoMarcaRepository) {
+    public PresupuestoController(PresupuestoRepository presupuestoRepository, EmailService emailService, DistribuidoraRepository distribuidoraRepository, JwtTokenService jwtTokenService, UsuarioRepository usuarioRepository, DetallePresupuestoRepository detallePresupuestoRepository, ProductoMarcaRepository productoMarcaRepository, PresupuestoRechazadoRepository presupuestoRechazadoRepository) {
         this.productoMarcaRepository = productoMarcaRepository;
         this.detallePresupuestoRepository = detallePresupuestoRepository;
         this.jwtTokenService = jwtTokenService;
@@ -51,6 +51,7 @@ public class PresupuestoController {
         this.emailService = emailService;
         this.distribuidoraRepository = distribuidoraRepository;
         this.usuarioRepository = usuarioRepository;
+        this.presupuestoRechazadoRepository = presupuestoRechazadoRepository;
     }
 
     @GetMapping("/{id}")
@@ -88,7 +89,7 @@ public class PresupuestoController {
 //        fechaVencimiento.setTime(presupuesto.getFecha().getTime() + (3 * 60 * 1000)); // 3 minutos para pruebas
         presupuesto.setFechaLimite(fechaVencimiento);
 
-        presupuesto.setCotizaciones(new ArrayList<Cotizacion>());
+        presupuesto.setCotizaciones(new ArrayList<>());
 
         Presupuesto presupuestoGuardado = presupuestoRepository.save(presupuesto);
 
@@ -148,6 +149,9 @@ public class PresupuestoController {
         Distribuidora distribuidora = distribuidoraOpt.get();
 
         Optional<Presupuesto> presupuestoOpt = presupuestoRepository.findById(id);
+
+
+
         if (presupuestoOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -196,7 +200,8 @@ public class PresupuestoController {
         // Crear una especificación para filtrar presupuestos por las categorías de la distribuidora
         Specification<Presupuesto> spec = PresupuestoSpecs.categoriasIn(categoriasDistribuidora);
         Specification<Presupuesto> fechaLimiteSpec = PresupuestoSpecs.fechaLimiteBefore(new Date());
-        spec = spec.and(fechaLimiteSpec);
+        Specification<Presupuesto> noRechazadoSpec = PresupuestoSpecs.noRechazadoPor(distribuidora.getCuit());
+        spec = spec.and(fechaLimiteSpec).and(noRechazadoSpec);
 
         // Obtener los presupuestos filtrados con paginación y orden por fecha descendente
         Page<Presupuesto> presupuestos = presupuestoRepository.findAll(spec, PageRequest.of(
@@ -213,7 +218,6 @@ public class PresupuestoController {
 
     @GetMapping("/detalles/{id}/enlistar")
     public ResponseEntity<PaginationResultDto> enlistarDetalles(Pageable pageable, @PathVariable Long id, @CookieValue (name = "accessToken") String jwtToken) {
-        String correo = jwtTokenService.extractUsername(jwtToken);
         Page<DetallePresupuesto> detallesOpt = detallePresupuestoRepository.findAllByPresupuesto_IdPresupuesto(id, PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
