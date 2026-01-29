@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CotizacionRepository extends JpaRepository<Cotizacion, Long> {
@@ -42,4 +43,6 @@ public interface CotizacionRepository extends JpaRepository<Cotizacion, Long> {
     @Procedure
     @Async
     void sp_NotificarDesplazamiento(Long IdPresupuesto);
+
+    Optional<Object> findByPresupuesto_IdAndDistribuidora_Cuit(Long id, String cuit);
 }

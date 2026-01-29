@@ -5,11 +5,9 @@ import com.uai.BuildLand.models.Categoria;
 import com.uai.BuildLand.models.Distribuidora;
 import com.uai.BuildLand.models.ProductoMarca;
 import com.uai.BuildLand.models.auth.Usuario;
-import com.uai.BuildLand.models.cotizacion.Cotizacion;
 import com.uai.BuildLand.models.dto.PaginationResultDto;
 import com.uai.BuildLand.models.presupuesto.DetallePresupuesto;
 import com.uai.BuildLand.models.presupuesto.Presupuesto;
-import com.uai.BuildLand.repositories.PresupuestoRechazadoRepository;
 import com.uai.BuildLand.repositories.*;
 import com.uai.BuildLand.services.EmailService;
 import com.uai.BuildLand.services.JwtTokenService;
@@ -41,9 +39,9 @@ public class PresupuestoController {
     private final JwtTokenService jwtTokenService;
     private final UsuarioRepository usuarioRepository;
     private final DetallePresupuestoRepository detallePresupuestoRepository;
-    private final PresupuestoRechazadoRepository presupuestoRechazadoRepository;
+    private final CotizacionRepository cotizacionRepository;
 
-    public PresupuestoController(PresupuestoRepository presupuestoRepository, EmailService emailService, DistribuidoraRepository distribuidoraRepository, JwtTokenService jwtTokenService, UsuarioRepository usuarioRepository, DetallePresupuestoRepository detallePresupuestoRepository, ProductoMarcaRepository productoMarcaRepository, PresupuestoRechazadoRepository presupuestoRechazadoRepository) {
+    public PresupuestoController(PresupuestoRepository presupuestoRepository, EmailService emailService, DistribuidoraRepository distribuidoraRepository, JwtTokenService jwtTokenService, UsuarioRepository usuarioRepository, DetallePresupuestoRepository detallePresupuestoRepository, ProductoMarcaRepository productoMarcaRepository, CotizacionRepository cotizacionRepository) {
         this.productoMarcaRepository = productoMarcaRepository;
         this.detallePresupuestoRepository = detallePresupuestoRepository;
         this.jwtTokenService = jwtTokenService;
@@ -51,7 +49,7 @@ public class PresupuestoController {
         this.emailService = emailService;
         this.distribuidoraRepository = distribuidoraRepository;
         this.usuarioRepository = usuarioRepository;
-        this.presupuestoRechazadoRepository = presupuestoRechazadoRepository;
+        this.cotizacionRepository = cotizacionRepository;
     }
 
     @GetMapping("/{id}")
@@ -150,13 +148,17 @@ public class PresupuestoController {
 
         Optional<Presupuesto> presupuestoOpt = presupuestoRepository.findById(id);
 
-
-
         if (presupuestoOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         Presupuesto presupuesto = presupuestoOpt.get();
+
+        Optional<Object> resultado = cotizacionRepository.findByPresupuesto_IdAndDistribuidora_Cuit(id, distribuidora.getCuit());
+
+        if (resultado.isPresent()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         try {
             presupuestoRepository.rechazarPresupuesto(presupuesto.getId(), distribuidora.getCuit());
