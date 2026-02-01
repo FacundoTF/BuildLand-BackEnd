@@ -50,6 +50,7 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.POST, "/api/presupuestos").hasAuthority("Z-Pr");
                     auth.requestMatchers(HttpMethod.GET, "/api/presupuestos/enlistar").hasAuthority("Y-Pr");
                     auth.requestMatchers(HttpMethod.GET, "/api/usuarios").authenticated();
+                    auth.requestMatchers(HttpMethod.POST, "/api/reporte/**").authenticated();
                     auth.anyRequest().authenticated();
                 })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
