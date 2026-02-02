@@ -3,6 +3,7 @@ package com.uai.BuildLand.controllers;
 import com.uai.BuildLand.controllers.specifications.PresupuestoSpecs;
 import com.uai.BuildLand.models.Categoria;
 import com.uai.BuildLand.models.Distribuidora;
+import com.uai.BuildLand.models.PersonaFisica;
 import com.uai.BuildLand.models.ProductoMarca;
 import com.uai.BuildLand.models.auth.Usuario;
 import com.uai.BuildLand.models.dto.PaginationResultDto;
@@ -40,8 +41,9 @@ public class PresupuestoController {
     private final UsuarioRepository usuarioRepository;
     private final DetallePresupuestoRepository detallePresupuestoRepository;
     private final CotizacionRepository cotizacionRepository;
+    private final PersonaFisicaRepository personaFisicaRepository;
 
-    public PresupuestoController(PresupuestoRepository presupuestoRepository, EmailService emailService, DistribuidoraRepository distribuidoraRepository, JwtTokenService jwtTokenService, UsuarioRepository usuarioRepository, DetallePresupuestoRepository detallePresupuestoRepository, ProductoMarcaRepository productoMarcaRepository, CotizacionRepository cotizacionRepository) {
+    public PresupuestoController(PresupuestoRepository presupuestoRepository, EmailService emailService, DistribuidoraRepository distribuidoraRepository, JwtTokenService jwtTokenService, UsuarioRepository usuarioRepository, DetallePresupuestoRepository detallePresupuestoRepository, ProductoMarcaRepository productoMarcaRepository, CotizacionRepository cotizacionRepository, PersonaFisicaRepository personaFisicaRepository) {
         this.productoMarcaRepository = productoMarcaRepository;
         this.detallePresupuestoRepository = detallePresupuestoRepository;
         this.jwtTokenService = jwtTokenService;
@@ -50,6 +52,7 @@ public class PresupuestoController {
         this.distribuidoraRepository = distribuidoraRepository;
         this.usuarioRepository = usuarioRepository;
         this.cotizacionRepository = cotizacionRepository;
+        this.personaFisicaRepository = personaFisicaRepository;
     }
 
     @GetMapping("/{id}")
@@ -181,14 +184,37 @@ public class PresupuestoController {
     @GetMapping("/enlistar")
     public ResponseEntity<PaginationResultDto> enlistar(Pageable pageable, @CookieValue (name = "accessToken") String jwtToken) {
         String correo = jwtTokenService.extractUsername(jwtToken);
+        Page<Presupuesto> presupuestos = null;
         Optional<Usuario> usuario = usuarioRepository.findByEmail(correo);
         if (usuario.isEmpty()) {
             return ResponseEntity.status(401).build();
         }
+
+        // TODO: Cuando es una persona fisica, en la paginacion hacer un spec que filtre los presupuestos cuyas cotizaciones fueron ya reclamadas. Debe haber una tabla donde se almacene el id del presupuesto
+
+        if (usuario.get().getTipoUsuario() == Usuario.TipoUsuario.DISTRIBUIDORA){
+            presupuestos = enlistarPresupuestosDistribuidora(pageable, usuario.get().getCuit());
+        } else if (usuario.get().getTipoUsuario() == Usuario.TipoUsuario.PERSONA_FISICA){
+            presupuestos = enlistarPresupuestosPersonaFisica(pageable, usuario.get().getCuit());
+        } else if (usuario.get().getTipoUsuario() == Usuario.TipoUsuario.EMPLEADO){
+            presupuestos = enlistarPresupuestosPersonaFisica(pageable, usuario.get().getCuit());
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        if (presupuestos == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } else if (presupuestos.getContent().isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(new PaginationResultDto(presupuestos.getContent(), presupuestos.hasPrevious(), presupuestos.hasNext()));
+    }
+    private Page<Presupuesto> enlistarPresupuestosDistribuidora(Pageable pageable, String cuit) {
         // Obtener la distribuidora por CUIT
-        Optional<Distribuidora> distribuidoraOpt = distribuidoraRepository.findById(usuario.get().getCuit());
+        Optional<Distribuidora> distribuidoraOpt = distribuidoraRepository.findById(cuit);
         if (distribuidoraOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return null;
         }
 
         Distribuidora distribuidora = distribuidoraOpt.get();
@@ -196,7 +222,7 @@ public class PresupuestoController {
 
         // Si la distribuidora no tiene categorías, retornar lista vacía
         if (categoriasDistribuidora == null || categoriasDistribuidora.isEmpty()) {
-            return ResponseEntity.ok(new PaginationResultDto(new ArrayList<>(), false, false));
+            return null;
         }
 
         // Crear una especificación para filtrar presupuestos por las categorías de la distribuidora
@@ -206,16 +232,30 @@ public class PresupuestoController {
         spec = spec.and(fechaLimiteSpec).and(noRechazadoSpec);
 
         // Obtener los presupuestos filtrados con paginación y orden por fecha descendente
-        Page<Presupuesto> presupuestos = presupuestoRepository.findAll(spec, PageRequest.of(
+
+        return presupuestoRepository.findAll(spec, PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
                 pageable.getSortOr(Sort.by(Sort.Direction.DESC, "fecha"))));
+    }
 
-        if (presupuestos.getContent().isEmpty()){
-            return ResponseEntity.status(404).build();
+    private Page<Presupuesto> enlistarPresupuestosPersonaFisica(Pageable pageable, String cuit){
+        // Obtener la distribuidora por CUIT
+        Optional<PersonaFisica> personaFisicaOpt = personaFisicaRepository.findById(cuit);
+        if (personaFisicaOpt.isEmpty()) {
+            return null;
         }
 
-        return ResponseEntity.ok(new PaginationResultDto(presupuestos.getContent(), presupuestos.hasPrevious(), presupuestos.hasNext()));
+        PersonaFisica personaFisica = personaFisicaOpt.get();
+
+        Specification<Presupuesto> fechaLimiteSpec = PresupuestoSpecs.fechaLimiteAfter(new Date());
+        Specification<Presupuesto> hechoPorSpec = PresupuestoSpecs.hechoPor(personaFisica.getCuit());
+        fechaLimiteSpec = fechaLimiteSpec.and(hechoPorSpec);
+
+        return presupuestoRepository.findAll(fechaLimiteSpec, PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                pageable.getSortOr(Sort.by(Sort.Direction.DESC, "fecha"))));
     }
 
     @GetMapping("/detalles/{id}/enlistar")

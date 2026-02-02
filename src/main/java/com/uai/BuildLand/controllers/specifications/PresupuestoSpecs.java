@@ -24,6 +24,22 @@ public class PresupuestoSpecs {
             return builder.greaterThanOrEqualTo(root.get("fechaLimite"), fecha);
         };
     }
+    public static Specification<Presupuesto> fechaLimiteAfter(java.util.Date fecha) {
+        return (root, query, builder) -> {
+            if (fecha == null) {
+                return builder.conjunction();
+            }
+            return builder.lessThanOrEqualTo(root.get("fechaLimite"), fecha);
+        };
+    }
+    public static Specification<Presupuesto> hechoPor(String cuit) {
+        return (root, query, builder) -> {
+            if (cuit == null || cuit.isEmpty()) {
+                return builder.conjunction();
+            }
+            return builder.equal(root.get("persona").get("cuit"), cuit);
+        };
+    }
 
     public static Specification<Presupuesto> noRechazadoPor(String cuit) {
         return (root, query, builder) -> {
