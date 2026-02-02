@@ -1,8 +1,10 @@
 package com.uai.BuildLand.repositories;
 
+import com.uai.BuildLand.models.Distribuidora;
 import com.uai.BuildLand.models.cotizacion.Cotizacion;
 import com.uai.BuildLand.models.cotizacion.CotizacionResumen;
 import com.uai.BuildLand.models.cotizacion.DetalleCotizacion;
+import com.uai.BuildLand.models.presupuesto.Presupuesto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
@@ -44,5 +46,5 @@ public interface CotizacionRepository extends JpaRepository<Cotizacion, Long> {
     @Async
     void sp_NotificarDesplazamiento(Long IdPresupuesto);
 
-    Optional<Object> findByPresupuesto_IdAndDistribuidora_Cuit(Long id, String cuit);
+    Optional<List<Object>> findByPresupuesto_IdPresupuestoAndDistribuidora_Cuit(Long id, String cuit);
 }

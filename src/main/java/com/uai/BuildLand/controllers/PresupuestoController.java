@@ -157,7 +157,7 @@ public class PresupuestoController {
 
         Presupuesto presupuesto = presupuestoOpt.get();
 
-        Optional<Object> resultado = cotizacionRepository.findByPresupuesto_IdAndDistribuidora_Cuit(id, distribuidora.getCuit());
+        Optional<List<Object>> resultado = cotizacionRepository.findByPresupuesto_IdPresupuestoAndDistribuidora_Cuit(presupuesto.getId(), distribuidora.getCuit());
 
         if (resultado.isPresent()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -276,4 +276,17 @@ public class PresupuestoController {
         Optional<List<DetallePresupuesto>> detalles = detallePresupuestoRepository.findAllByPresupuesto_IdPresupuesto(id);
         return detalles.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/verificarFechaLimite/{id}")
+    public ResponseEntity<Boolean> verificarFechaLimite(@PathVariable Long id) {
+        Optional<Presupuesto> presupuestoOpt = presupuestoRepository.findById(id);
+        if (presupuestoOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Presupuesto presupuesto = presupuestoOpt.get();
+        Date fechaActual = new Date();
+        boolean dentroDeLimite = fechaActual.after(presupuesto.getFechaLimite()) || fechaActual.equals(presupuesto.getFechaLimite());
+        return ResponseEntity.ok(dentroDeLimite);
+    }
+
 }
