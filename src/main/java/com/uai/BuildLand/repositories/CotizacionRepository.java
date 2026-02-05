@@ -1,11 +1,11 @@
 package com.uai.BuildLand.repositories;
 
-import com.uai.BuildLand.models.Distribuidora;
 import com.uai.BuildLand.models.cotizacion.Cotizacion;
+import com.uai.BuildLand.models.cotizacion.CotizacionMensaje;
 import com.uai.BuildLand.models.cotizacion.CotizacionResumen;
 import com.uai.BuildLand.models.cotizacion.DetalleCotizacion;
-import com.uai.BuildLand.models.presupuesto.Presupuesto;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
@@ -71,8 +71,8 @@ public interface CotizacionRepository extends JpaRepository<Cotizacion, Long> {
     List<Object> sp_ReporteCotizacionesPerdidasGanadas(Long DistribuidoraCuit, Date FechaInicio, Date FechaFin);
 
     @Procedure
-    List<Object> sp_ReporteRazonCotizacionesRechazadasGral(Long DistribuidoraCuit, Date FechaInicio, Date FechaFin);
+    List<Object> sp_ReporteMensajeCotizacionesRechazadasGral(Long DistribuidoraCuit, Date FechaInicio, Date FechaFin);
 
     @Procedure
-    List<Object> sp_ReporteRazonCotizacionesRechazadasEspe(Long DistribuidoraCuit, Date FechaInicio, Date FechaFin);
+    List<Object> sp_ReporteMensajeCotizacionesRechazadas(String DistribuidoraCuit, Date FechaInicio, Date FechaFin);
 }
