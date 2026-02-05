@@ -1,9 +1,9 @@
 package com.uai.BuildLand.controllers;
 
 import com.uai.BuildLand.models.Distribuidora;
-import com.uai.BuildLand.models.Producto;
 import com.uai.BuildLand.models.ProductoMarca;
 import com.uai.BuildLand.models.cotizacion.Cotizacion;
+import com.uai.BuildLand.models.cotizacion.CotizacionMensaje;
 import com.uai.BuildLand.models.cotizacion.CotizacionResumen;
 import com.uai.BuildLand.models.cotizacion.DetalleCotizacion;
 import com.uai.BuildLand.models.dto.CotizacionDto;
@@ -12,6 +12,7 @@ import com.uai.BuildLand.repositories.*;
 import com.uai.BuildLand.services.JwtTokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -111,6 +112,44 @@ public class CotizacionController {
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/rechazar/{idCotizacion}")
+    @Transactional
+    public ResponseEntity<Void> rechazarCotizacion(@PathVariable Long idCotizacion, @RequestBody CotizacionMensaje mensaje) {
+        try {
+            Optional<Object> cotizacionAceptada = this.cotizacionRepository.encontrarCotizacionAceptada(idCotizacion);
+            if (cotizacionAceptada.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            Optional<Object> cotizacionRechazada = this.cotizacionRepository.encontrarCotizacionRechazada(idCotizacion);
+            if (cotizacionRechazada.isPresent()){
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }
+            this.cotizacionRepository.rechazarCotizacion(idCotizacion, mensaje);
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/aceptar/{idCotizacion}")
+    @Transactional
+    public ResponseEntity<Void> aceptarCotizacion(@PathVariable Long idCotizacion) {
+        try {
+            Optional<Object> cotizacionAceptada = this.cotizacionRepository.encontrarCotizacionAceptada(idCotizacion);
+            if (cotizacionAceptada.isPresent()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }
+            Optional<Object> cotizacionRechazada = this.cotizacionRepository.encontrarCotizacionRechazada(idCotizacion);
+            if (cotizacionRechazada.isPresent()){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            this.cotizacionRepository.aceptarCotizacion(idCotizacion, new CotizacionMensaje(1L, "Aceptada"));
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

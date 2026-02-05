@@ -11,6 +11,8 @@ import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
+
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,4 +49,18 @@ public interface CotizacionRepository extends JpaRepository<Cotizacion, Long> {
     void sp_NotificarDesplazamiento(Long IdPresupuesto);
 
     Optional<List<Object>> findByPresupuesto_IdPresupuestoAndDistribuidora_Cuit(Long id, String cuit);
+
+    @Modifying
+    @Query("INSERT INTO CotizacionAccionada(cotizacion,accion,mensaje) VALUES(:idCotizacion, 'RECHAZADA', :idMensaje)")
+    void rechazarCotizacion(@Param("idCotizacion") Long idCotizacion, @Param("idMensaje") CotizacionMensaje idMensaje);
+
+    @Modifying
+    @Query("INSERT INTO CotizacionAccionada(cotizacion,accion,mensaje) VALUES(:idCotizacion, 'ACEPTADA', :mensaje)")
+    void aceptarCotizacion(@Param("idCotizacion") Long idCotizacion, @Param("mensaje") CotizacionMensaje mensaje);
+
+    @Query("SELECT ca FROM CotizacionAccionada ca WHERE ca.cotizacion.idCotizacion = :idCotizacion AND ca.accion = 'ACEPTADA'")
+    Optional<Object> encontrarCotizacionAceptada(@Param("idCotizacion") Long idCotizacion);
+
+    @Query("SELECT ca FROM CotizacionAccionada ca WHERE ca.cotizacion.idCotizacion = :idCotizacion AND ca.accion = 'RECHAZADA'")
+    Optional<Object> encontrarCotizacionRechazada(@Param("idCotizacion") Long idCotizacion);
 }
