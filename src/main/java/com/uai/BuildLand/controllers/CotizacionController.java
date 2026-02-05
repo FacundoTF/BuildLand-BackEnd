@@ -133,6 +133,25 @@ public class CotizacionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    @GetMapping("/mensajes-rechazo")
+    public ResponseEntity<List<CotizacionMensaje>> relevarMensajesRechazo(){
+        try{
+            List<Object> mensajes = this.cotizacionRepository.obtenerMensajesCotizacion();
+            List<CotizacionMensaje> mensajesConvertidos = mensajes.stream().map((obj) -> {
+                Object[] fila = (Object[]) obj;
+                CotizacionMensaje mensaje = new CotizacionMensaje();
+                mensaje.setIdMensaje(fila[0] != null ? ((Number) fila[0]).longValue() : null);
+                mensaje.setMensaje(fila[1] != null ? fila[1].toString() : "");
+                return mensaje;
+            }).toList();
+            if (mensajes.isEmpty()){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(mensajesConvertidos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
     @PostMapping("/aceptar/{idCotizacion}")
     @Transactional

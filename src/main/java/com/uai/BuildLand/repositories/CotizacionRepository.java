@@ -63,4 +63,16 @@ public interface CotizacionRepository extends JpaRepository<Cotizacion, Long> {
 
     @Query("SELECT ca FROM CotizacionAccionada ca WHERE ca.cotizacion.idCotizacion = :idCotizacion AND ca.accion = 'RECHAZADA'")
     Optional<Object> encontrarCotizacionRechazada(@Param("idCotizacion") Long idCotizacion);
+
+    @Query("SELECT idMensaje, mensaje FROM CotizacionMensaje")
+    List<Object> obtenerMensajesCotizacion();
+
+    @Procedure
+    List<Object> sp_ReporteCotizacionesPerdidasGanadas(Long DistribuidoraCuit, Date FechaInicio, Date FechaFin);
+
+    @Procedure
+    List<Object> sp_ReporteRazonCotizacionesRechazadasGral(Long DistribuidoraCuit, Date FechaInicio, Date FechaFin);
+
+    @Procedure
+    List<Object> sp_ReporteRazonCotizacionesRechazadasEspe(Long DistribuidoraCuit, Date FechaInicio, Date FechaFin);
 }
