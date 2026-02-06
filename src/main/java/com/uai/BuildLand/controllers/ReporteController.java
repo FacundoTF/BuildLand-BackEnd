@@ -1,10 +1,14 @@
 package com.uai.BuildLand.controllers;
 
+import com.uai.BuildLand.models.Distribuidora;
+import com.uai.BuildLand.models.reporte.mensajesRechazoCotizacion.ReporteRechazoCotizacionDatos;
 import com.uai.BuildLand.models.reporte.productosSolicitados.ReporteProductosSolicitados;
 import com.uai.BuildLand.models.reporte.productosSolicitados.ReporteProductosSolicitadosDatos;
 import com.uai.BuildLand.models.reporte.productosSolicitados.ReporteProductosSolicitadosEspecifico;
-import com.uai.BuildLand.models.reporte.productosSolicitados.ReporteProductosSolicitadosResponse;
+import com.uai.BuildLand.repositories.CotizacionRepository;
+import com.uai.BuildLand.repositories.DistribuidoraRepository;
 import com.uai.BuildLand.repositories.PresupuestoRepository;
+import com.uai.BuildLand.services.JwtTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("api/reporte")
@@ -19,6 +24,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReporteController {
     private final PresupuestoRepository presupuestoRepository;
+    private final CotizacionRepository cotizacionRepository;
+    private final DistribuidoraRepository distribuidoraRepository;
+    private final JwtTokenService jwtTokenService;
 
     @PostMapping("/productos-solicitados")
     @Transactional
@@ -89,5 +97,58 @@ public class ReporteController {
             return datosSolicitados;
         }).toList();
         return ResponseEntity.status(HttpStatus.OK).body(reporte);
+    }
+    @PostMapping("/cotizaciones-rechazadas-mensajes")
+    @Transactional
+    public ResponseEntity<List<ReporteRechazoCotizacionDatos>> reportarCotizacionesRechazadasMensajes(@RequestBody ReporteProductosSolicitados re, @CookieValue("accessToken") String token) {
+        Optional<Distribuidora> distribuidoraOpt = distribuidoraRepository.findByUsuario_Email(jwtTokenService.extractUsername(token));
+        if (distribuidoraOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        Distribuidora distribuidora = distribuidoraOpt.get();
+
+        List<Object> datosEnObjeto;
+        try {
+            datosEnObjeto = cotizacionRepository.sp_ReporteMensajeCotizacionesRechazadas(distribuidora.getCuit(), re.getFechaInicio(), re.getFechaFin());
+
+            List<ReporteRechazoCotizacionDatos> datosList = datosEnObjeto.stream().map((obj) -> {
+                Object[] fila = (Object[]) obj;
+                ReporteRechazoCotizacionDatos datos = new ReporteRechazoCotizacionDatos();
+                datos.setPorcentaje(fila[0] != null ? ((Number) fila[0]).doubleValue() : 0.0);
+                datos.setMensaje(fila[1] != null ? fila[1].toString() : "");
+                datos.setCategoria(fila[2] != null ? fila[2].toString() : "");
+                return datos;
+            }).toList();
+
+            return ResponseEntity.ok(datosList);
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    @PostMapping("/cotizaciones-rechazadas-mensajes-general")
+    @Transactional
+    public ResponseEntity<List<ReporteRechazoCotizacionDatos>> reportarCotizacionesRechazadasMensajesGeneral(@RequestBody ReporteProductosSolicitados re, @CookieValue("accessToken") String token) {
+        Optional<Distribuidora> distribuidoraOpt = distribuidoraRepository.findByUsuario_Email(jwtTokenService.extractUsername(token));
+        if (distribuidoraOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        Distribuidora distribuidora = distribuidoraOpt.get();
+
+        List<Object> datosEnObjeto;
+        try {
+            datosEnObjeto = cotizacionRepository.sp_ReporteMensajeCotizacionesRechazadasGral(distribuidora.getCuit(), re.getFechaInicio(), re.getFechaFin());
+            List<ReporteRechazoCotizacionDatos> datosList = datosEnObjeto.stream().map((obj) -> {
+                Object[] fila = (Object[]) obj;
+                ReporteRechazoCotizacionDatos datos = new ReporteRechazoCotizacionDatos();
+                datos.setPorcentaje(fila[0] != null ? ((Number) fila[0]).doubleValue() : 0.0);
+                datos.setMensaje(fila[1] != null ? fila[1].toString() : "");
+                return datos;
+            }).toList();
+            return ResponseEntity.ok(datosList);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

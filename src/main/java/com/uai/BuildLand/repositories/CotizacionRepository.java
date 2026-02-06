@@ -68,10 +68,10 @@ public interface CotizacionRepository extends JpaRepository<Cotizacion, Long> {
     List<Object> obtenerMensajesCotizacion();
 
     @Procedure
-    List<Object> sp_ReporteCotizacionesPerdidasGanadas(Long DistribuidoraCuit, Date FechaInicio, Date FechaFin);
+    List<Object> sp_ReporteCotizacionesPerdidasGanadas(String DistribuidoraCuit, Date FechaInicio, Date FechaFin);
 
     @Procedure
-    List<Object> sp_ReporteMensajeCotizacionesRechazadasGral(Long DistribuidoraCuit, Date FechaInicio, Date FechaFin);
+    List<Object> sp_ReporteMensajeCotizacionesRechazadasGral(String DistribuidoraCuit, Date FechaInicio, Date FechaFin);
 
     @Procedure
     List<Object> sp_ReporteMensajeCotizacionesRechazadas(String DistribuidoraCuit, Date FechaInicio, Date FechaFin);
