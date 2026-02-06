@@ -98,6 +98,34 @@ public class ReporteController {
         }).toList();
         return ResponseEntity.status(HttpStatus.OK).body(reporte);
     }
+    @PostMapping("/cotizaciones-ganadas-perdidas")
+    @Transactional
+    public ResponseEntity<List<ReporteRechazoCotizacionDatos>> reportarCotizacionesGanadasPerdidas(@RequestBody ReporteProductosSolicitados re, @CookieValue("accessToken") String token) {
+        Optional<Distribuidora> distribuidoraOpt = distribuidoraRepository.findByUsuario_Email(jwtTokenService.extractUsername(token));
+        if (distribuidoraOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        Distribuidora distribuidora = distribuidoraOpt.get();
+
+        List<Object> datosEnObjeto;
+        try {
+            datosEnObjeto = cotizacionRepository.sp_ReporteCotizacionesPerdidasGanadas(distribuidora.getCuit(), re.getFechaInicio(), re.getFechaFin());
+
+            List<ReporteRechazoCotizacionDatos> datosList = datosEnObjeto.stream().map((obj) -> {
+                Object[] fila = (Object[]) obj;
+                ReporteRechazoCotizacionDatos datos = new ReporteRechazoCotizacionDatos();
+                datos.setPorcentaje(fila[1] != null ? ((Number) fila[1]).doubleValue() : 0.0);
+                datos.setMensaje(fila[0] != null ? fila[0].toString() : "");
+                return datos;
+            }).toList();
+
+            return ResponseEntity.ok(datosList);
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
     @PostMapping("/cotizaciones-rechazadas-mensajes")
     @Transactional
     public ResponseEntity<List<ReporteRechazoCotizacionDatos>> reportarCotizacionesRechazadasMensajes(@RequestBody ReporteProductosSolicitados re, @CookieValue("accessToken") String token) {
