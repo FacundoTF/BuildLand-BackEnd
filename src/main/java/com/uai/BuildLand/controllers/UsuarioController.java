@@ -1,5 +1,11 @@
 package com.uai.BuildLand.controllers;
 
+import com.uai.BuildLand.models.Distribuidora;
+import com.uai.BuildLand.models.Empleado;
+import com.uai.BuildLand.models.PersonaFisica;
+import com.uai.BuildLand.repositories.DistribuidoraRepository;
+import com.uai.BuildLand.repositories.EmpleadoRepository;
+import com.uai.BuildLand.repositories.PersonaFisicaRepository;
 import com.uai.BuildLand.services.JwtTokenService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,8 +33,20 @@ import java.util.Objects;
 public class UsuarioController {
     private final UsuarioRepository usuarioRepository;
     private final JwtTokenService jwtTokenService;
+    private final PersonaFisicaRepository pfRepository;
+    private final DistribuidoraRepository dRepository;
+    private final EmpleadoRepository eRepository;
 
-    public UsuarioController(UsuarioRepository usuarioRepository, JwtTokenService jwtTokenService) {
+    public UsuarioController(
+            UsuarioRepository usuarioRepository,
+            JwtTokenService jwtTokenService,
+            PersonaFisicaRepository pfRepository,
+            DistribuidoraRepository dRepository,
+            EmpleadoRepository eRepository
+    ) {
+        this.pfRepository = pfRepository;
+        this.dRepository = dRepository;
+        this.eRepository = eRepository;
         this.jwtTokenService = jwtTokenService;
         this.usuarioRepository = usuarioRepository;
     }
@@ -40,6 +58,28 @@ public class UsuarioController {
         Optional<Usuario> usuario = usuarioRepository.findByEmail(correo);
         if (usuario.isPresent()) {
             return ResponseEntity.ok(usuario.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{email}")
+    public ResponseEntity<String> obtenerNombrePorEmail(@PathVariable String email) {
+        Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
+        if (usuario.isPresent()) {
+            Usuario usuarioEncontrado = usuario.get();
+            String nombreUsuario = "";
+            if (usuarioEncontrado.getTipoUsuario() == Usuario.TipoUsuario.PERSONA_FISICA){
+                PersonaFisica personaFisica = pfRepository.findByUsuario(usuarioEncontrado);
+                nombreUsuario = personaFisica.getNombre();
+            } else if (usuarioEncontrado.getTipoUsuario() == Usuario.TipoUsuario.DISTRIBUIDORA) {
+                Distribuidora distribuidora = dRepository.findByUsuario(usuarioEncontrado);
+                nombreUsuario = distribuidora.getNombre();
+            } else if (usuarioEncontrado.getTipoUsuario() == Usuario.TipoUsuario.EMPLEADO) {
+                Empleado empleado = eRepository.findByUsuario(usuarioEncontrado);
+                nombreUsuario = empleado.getNombre();
+            }
+            return ResponseEntity.ok(nombreUsuario);
         } else {
             return ResponseEntity.notFound().build();
         }

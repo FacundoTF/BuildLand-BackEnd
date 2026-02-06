@@ -22,7 +22,9 @@ public interface DistribuidoraRepository extends CrudRepository<Distribuidora, S
     //  * @return true si existe una distribuidora con ese correo, false en caso contrario
     //  */
      boolean existsByUsuario(Usuario correoElectronico);
-    
+
+    Distribuidora findByUsuario(Usuario usuario);
+
     /**
      * Busca una distribuidora por CUIT (campo id)
      * @param cuit CUIT a buscar
