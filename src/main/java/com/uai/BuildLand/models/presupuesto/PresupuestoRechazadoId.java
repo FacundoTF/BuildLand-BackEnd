@@ -14,7 +14,7 @@ import java.io.Serializable;
 @Embeddable
 public class PresupuestoRechazadoId implements Serializable {
     private static final long serialVersionUID = -5151152699701217151L;
-    @Column(name = "cuit", nullable = false, length = 11)
+    @Column(name = "usuario_cuit", nullable = false, length = 11)
     private String cuit;
 
     @Column(name = "id_presupuesto", nullable = false)

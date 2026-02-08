@@ -15,7 +15,7 @@ public class PresupuestoRechazado {
 
     @MapsId("cuit")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "cuit", nullable = false)
+    @JoinColumn(name = "usuario_cuit", nullable = false, columnDefinition = "varchar(11)")
     private Distribuidora cuit;
 
     @MapsId("idPresupuesto")
