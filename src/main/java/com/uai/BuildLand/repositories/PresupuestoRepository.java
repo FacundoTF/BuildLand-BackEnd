@@ -21,7 +21,7 @@ public interface PresupuestoRepository extends
         JpaSpecificationExecutor<Presupuesto> {
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO presupuestos_rechazados (cuit, id_presupuesto) VALUES (:cuit, :idPresupuesto)", nativeQuery = true)
+    @Query(value = "INSERT INTO presupuestos_rechazados (usuario_cuit, id_presupuesto) VALUES (:cuit, :idPresupuesto)", nativeQuery = true)
     void rechazarPresupuesto(@Param("idPresupuesto") Long idPresupuesto, @Param("cuit") String cuit);
 
     @Procedure
