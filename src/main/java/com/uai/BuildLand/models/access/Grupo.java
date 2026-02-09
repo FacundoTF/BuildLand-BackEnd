@@ -11,59 +11,39 @@ import jakarta.persistence.*;
  */
 @Entity
 @Table(name = "grupos")
-public class Grupo implements ConjuntoGrupoPermiso {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @Column(nullable = false, length = 100)
-    private String nombre;
-    
+@PrimaryKeyJoinColumn(name = "id")
+public class Grupo extends ConjuntoGrupoPermiso {
+
     @Column(length = 255)
     private String descripcion;
-    
-    @ManyToMany(fetch = FetchType.EAGER)
+
+    @ManyToMany(fetch = FetchType.EAGER) // TODO: Consider LAZY if performance issues arise
     @JoinTable(
-        name = "grupo_permisos",
+        name = "grupo_elementos",
         joinColumns = @JoinColumn(name = "id_grupo"),
-        inverseJoinColumns = @JoinColumn(name = "id_permiso")
+        inverseJoinColumns = @JoinColumn(name = "id_elemento")
     )
-    private List<Permiso> permisos = new ArrayList<>();
-    
-    @OneToMany(mappedBy = "grupoPadre", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<GrupoSubgrupo> subgrupos = new ArrayList<>();
-    
-    @OneToMany(mappedBy = "grupoHijo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<GrupoSubgrupo> gruposContenedores = new ArrayList<>();
+    private List<ConjuntoGrupoPermiso> elementos = new ArrayList<>();
 
     // Constructor por defecto
     public Grupo() {
     }
 
     // Constructor con parámetros
-    public Grupo(String nombre, String descripcion, List<Permiso> permisos) {
+    public Grupo(String nombre, String descripcion) {
         this.nombre = nombre;
         this.descripcion = descripcion;
-        this.permisos = permisos != null ? permisos : new ArrayList<>();
-        this.subgrupos = new ArrayList<>();
-        this.gruposContenedores = new ArrayList<>();
+        this.elementos = new ArrayList<>();
     }
 
-    // Getters y Setters
-    public Long getId() {
-        return id;
+    public void agregarElemento(ConjuntoGrupoPermiso elemento) {
+        if (!elementos.contains(elemento)) {
+            elementos.add(elemento);
+        }
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void removerElemento(ConjuntoGrupoPermiso elemento) {
+        elementos.remove(elemento);
     }
 
     public String getDescripcion() {
@@ -74,28 +54,12 @@ public class Grupo implements ConjuntoGrupoPermiso {
         this.descripcion = descripcion;
     }
 
-    public List<Permiso> getPermisos() {
-        return permisos;
+    public List<ConjuntoGrupoPermiso> getElementos() {
+        return elementos;
     }
 
-    public void setPermisos(List<Permiso> permisos) {
-        this.permisos = permisos;
-    }
-
-    public List<GrupoSubgrupo> getSubgrupos() {
-        return subgrupos;
-    }
-
-    public void setSubgrupos(List<GrupoSubgrupo> subgrupos) {
-        this.subgrupos = subgrupos;
-    }
-
-    public List<GrupoSubgrupo> getGruposContenedores() {
-        return gruposContenedores;
-    }
-
-    public void setGruposContenedores(List<GrupoSubgrupo> gruposContenedores) {
-        this.gruposContenedores = gruposContenedores;
+    public void setElementos(List<ConjuntoGrupoPermiso> elementos) {
+        this.elementos = elementos;
     }
 
     @Override
@@ -104,8 +68,7 @@ public class Grupo implements ConjuntoGrupoPermiso {
                 "id=" + id +
                 ", nombre='" + nombre + '\'' +
                 ", descripcion='" + descripcion + '\'' +
-                ", permisos=" + permisos.size() +
-                ", subgrupos=" + subgrupos.size() +
+                ", elementos=" + elementos.size() +
                 '}';
     }
 }

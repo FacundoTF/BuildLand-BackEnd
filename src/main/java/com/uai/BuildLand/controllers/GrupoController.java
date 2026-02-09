@@ -8,10 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.uai.BuildLand.models.access.ConjuntoGrupoPermiso;
 import com.uai.BuildLand.models.access.Grupo;
-import com.uai.BuildLand.models.access.GrupoSubgrupo;
 import com.uai.BuildLand.repositories.GrupoRepository;
-import com.uai.BuildLand.services.GrupoSubgrupoService;
 
 import java.net.URI;
 import java.util.List;
@@ -26,11 +25,9 @@ import java.util.Objects;
 @CrossOrigin(origins = "*")
 public class GrupoController {
     private final GrupoRepository grupoRepository;
-    private final GrupoSubgrupoService grupoSubgrupoService;
 
-    public GrupoController(GrupoRepository grupoRepository, GrupoSubgrupoService grupoSubgrupoService) {
+    public GrupoController(GrupoRepository grupoRepository) {
         this.grupoRepository = grupoRepository;
-        this.grupoSubgrupoService = grupoSubgrupoService;
     }
 
     /**
@@ -134,32 +131,73 @@ public class GrupoController {
      * 
      * @param grupoPadreId ID del grupo padre
      * @param grupoHijoId ID del grupo que será subgrupo
-     * @return GrupoSubgrupo creado o error si la operación es inválida
+     * @return Grupo actualizado o error
      */
     @PostMapping("/{grupoPadreId}/subgrupos/{grupoHijoId}")
     public ResponseEntity<?> agregarSubgrupo(@PathVariable Long grupoPadreId, 
                                               @PathVariable Long grupoHijoId) {
-        try {
-            GrupoSubgrupo relacion = grupoSubgrupoService.agregarSubgrupo(grupoPadreId, grupoHijoId);
-            return ResponseEntity.status(201).body(relacion);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+        if (grupoPadreId.equals(grupoHijoId)) {
+            return ResponseEntity.badRequest().body("Un grupo no puede ser subgrupo de sí mismo");
         }
+
+        Optional<Grupo> padreOpt = grupoRepository.findById(grupoPadreId);
+        Optional<Grupo> hijoOpt = grupoRepository.findById(grupoHijoId);
+
+        if (padreOpt.isEmpty() || hijoOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Grupo padre = padreOpt.get();
+        Grupo hijo = hijoOpt.get();
+
+        // Verificar circularidad
+        if (esSubgrupo(hijo, padre)) {
+            return ResponseEntity.badRequest().body("Referencia circular detectada: el grupo hijo ya contiene al padre.");
+        }
+
+        padre.agregarElemento(hijo);
+        grupoRepository.save(padre);
+
+        return ResponseEntity.ok(padre);
+    }
+
+    // DFS para verificar si 'buscado' es subgrupo (directo o indirecto) de 'inicio'
+    private boolean esSubgrupo(Grupo inicio, Grupo buscado) {
+        for (ConjuntoGrupoPermiso elemento : inicio.getElementos()) {
+            if (elemento.getId().equals(buscado.getId())) {
+                return true;
+            }
+            if (elemento instanceof Grupo) {
+                if (esSubgrupo((Grupo) elemento, buscado)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
-     * Elimina la relación de subgrupo
-     * 
-     * @param relacionId ID de la relación a eliminar
-     * @return 204 si se eliminó correctamente, 404 si no existe
+     * Elimina un subgrupo de un grupo padre
+     *
+     * @param grupoPadreId ID del grupo padre
+     * @param grupoHijoId ID del grupo hijo a remover
+     * @return 204 si se eliminó correctamente
      */
-    @DeleteMapping("/subgrupos/{relacionId}")
-    public ResponseEntity<Void> eliminarSubgrupo(@PathVariable Long relacionId) {
-        try {
-            grupoSubgrupoService.eliminarSubgrupo(relacionId);
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
+    @DeleteMapping("/{grupoPadreId}/subgrupos/{grupoHijoId}")
+    public ResponseEntity<Void> eliminarSubgrupo(@PathVariable Long grupoPadreId, @PathVariable Long grupoHijoId) {
+        Optional<Grupo> padreOpt = grupoRepository.findById(grupoPadreId);
+        Optional<Grupo> hijoOpt = grupoRepository.findById(grupoHijoId);
+
+        if (padreOpt.isEmpty() || hijoOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
+        Grupo padre = padreOpt.get();
+        Grupo hijo = hijoOpt.get();
+
+        padre.removerElemento(hijo);
+        grupoRepository.save(padre);
+
+        return ResponseEntity.noContent().build();
     }
 }

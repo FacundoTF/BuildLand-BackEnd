@@ -17,6 +17,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("api/categorias")
+@CrossOrigin(origins = "*")
 public class CategoriaController {
     private final CategoriaRepository categoriaRepository;
     private final DistribuidoraRepository distribuidoraRepository;

@@ -7,14 +7,8 @@ import jakarta.persistence.*;
  */
 @Entity
 @Table(name = "permisos")
-public class Permiso implements ConjuntoGrupoPermiso {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long idPermiso;
-    
-    @Column(nullable = false, unique = true, length = 100)
-    private String nombre;
+@PrimaryKeyJoinColumn(name = "id")
+public class Permiso extends ConjuntoGrupoPermiso {
 
     // Constructor por defecto
     public Permiso() {
@@ -25,26 +19,10 @@ public class Permiso implements ConjuntoGrupoPermiso {
         this.nombre = nombre;
     }
 
-    public Long getId() {
-        return idPermiso;
-    }
-
-    public void setId(Long id) {
-        this.idPermiso = id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
     @Override
     public String toString() {
         return "Permiso{" +
-                "id=" + idPermiso +
+                "id=" + id +
                 ", nombre='" + nombre + '\'' +
                 '}';
     }
