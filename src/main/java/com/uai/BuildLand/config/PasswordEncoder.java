@@ -1,4 +1,4 @@
-package com.uai.BuildLand.security;
+package com.uai.BuildLand.config;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
