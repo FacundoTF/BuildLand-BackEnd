@@ -202,13 +202,20 @@ public class PresupuestoController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
+        assert presupuestos != null;
+        List<Presupuesto> presupuestoLista = presupuestos.getContent().stream().peek(c -> c.getDetalles().forEach(d -> {
+            c.setCotizaciones(null);
+        })).toList();
+
         if (presupuestos == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } else if (presupuestos.getContent().isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        return ResponseEntity.ok(new PaginationResultDto(presupuestos.getContent(), presupuestos.hasPrevious(), presupuestos.hasNext()));
+        PaginationResultDto resultDto = new PaginationResultDto(presupuestoLista, presupuestos.hasPrevious(), presupuestos.hasNext());
+
+        return ResponseEntity.ok(resultDto);
     }
     private Page<Presupuesto> enlistarPresupuestosDistribuidora(Pageable pageable, String cuit) {
         // Obtener la distribuidora por CUIT
