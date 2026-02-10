@@ -1,5 +1,6 @@
 package com.uai.BuildLand.repositories;
 
+import com.uai.BuildLand.models.Distribuidora;
 import com.uai.BuildLand.models.cotizacion.Cotizacion;
 import com.uai.BuildLand.models.cotizacion.CotizacionMensaje;
 import com.uai.BuildLand.models.cotizacion.CotizacionResumen;
@@ -75,4 +76,6 @@ public interface CotizacionRepository extends JpaRepository<Cotizacion, Long> {
 
     @Procedure
     List<Object> sp_ReporteMensajeCotizacionesRechazadas(String DistribuidoraCuit, Date FechaInicio, Date FechaFin);
+
+    List<Cotizacion> findByDistribuidora(Distribuidora distribuidora);
 }
