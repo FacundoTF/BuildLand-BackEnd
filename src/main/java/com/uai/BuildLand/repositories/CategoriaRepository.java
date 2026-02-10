@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface CategoriaRepository extends JpaRepository<Categoria,String> {
-    @Query(value = "SELECT nombre_categoria FROM distribuidora_categoria dc WHERE dc.usuario_cuit = :distribuidoraCuit", nativeQuery = true)
+    @Query(value = "SELECT nombre_categoria FROM distribuidora_categoria dc WHERE dc.cuit = :distribuidoraCuit", nativeQuery = true)
     List<Categoria> findByDistribuidoraId(String distribuidoraCuit);
 }
