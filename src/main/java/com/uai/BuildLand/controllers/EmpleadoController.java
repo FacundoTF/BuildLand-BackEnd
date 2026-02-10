@@ -86,7 +86,7 @@ public class EmpleadoController {
 
         Empleado empleadoGuardado = empleadoRepository.save(empleado);
 
-        URI uri = ucb.path("/empleados/{cuit}").buildAndExpand(empleadoGuardado.getCuit()).toUri();
+        URI uri = ucb.path("/empleados/{cuit}").buildAndExpand(empleadoGuardado.getUsuario().getCuit()).toUri();
         return ResponseEntity.created(uri).body(empleadoGuardado);
     }
 
@@ -97,7 +97,7 @@ public class EmpleadoController {
      */
     @PatchMapping("/{cuit}")
     public ResponseEntity<Empleado> actualizar(@RequestBody Empleado empleado) {
-        String nonNullCuit = Objects.requireNonNull(empleado.getCuit(), "cuit must not be null");
+        String nonNullCuit = Objects.requireNonNull(empleado.getUsuario().getCuit(), "cuit must not be null");
         Optional<Empleado> empleadoDesactualizado = empleadoRepository.findById(nonNullCuit);
         if (empleadoDesactualizado.isPresent()) {
             empleadoRepository.save(empleado);

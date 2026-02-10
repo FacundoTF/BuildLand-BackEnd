@@ -14,11 +14,11 @@ import jakarta.persistence.Table;
 @Table(name = "personas_fisicas")
 public class PersonaFisica {
     @Id
-    @JoinColumn(name = "usuario_cuit")
     private String cuit;
 
     @OneToOne
     @MapsId
+    @JoinColumn(name = "cuit")
     private Usuario usuario;
 
     @Column(nullable = false, length = 100)

@@ -8,11 +8,11 @@ import java.util.List;
 @Table(name = "distribuidoras")
 public class Distribuidora {
     @Id
-    @JoinColumn(name = "usuario_cuit")
     private String cuit;
 
     @OneToOne
     @MapsId
+    @JoinColumn(name = "cuit")
     private Usuario usuario;
 
     @Column(nullable = false, length = 100)
@@ -36,7 +36,7 @@ public class Distribuidora {
     @ManyToMany
     @JoinTable(
         name = "distribuidora_categoria",
-        joinColumns = @JoinColumn(name = "usuario_cuit"),
+        joinColumns = @JoinColumn(name = "cuit"),
         inverseJoinColumns = @JoinColumn(name = "nombre_categoria")
     )
     private List<Categoria> categorias;
