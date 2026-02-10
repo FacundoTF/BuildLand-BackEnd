@@ -10,6 +10,9 @@ import jakarta.persistence.*;
 @PrimaryKeyJoinColumn(name = "id")
 public class Permiso extends ConjuntoGrupoPermiso {
 
+    @Column(length = 255)
+    protected String descripcion;
+
     // Constructor por defecto
     public Permiso() {
     }
@@ -19,11 +22,20 @@ public class Permiso extends ConjuntoGrupoPermiso {
         this.nombre = nombre;
     }
 
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
     @Override
     public String toString() {
         return "Permiso{" +
                 "id=" + id +
                 ", nombre='" + nombre + '\'' +
+                ", descripcion='" + descripcion + '\'' +
                 '}';
     }
 }
