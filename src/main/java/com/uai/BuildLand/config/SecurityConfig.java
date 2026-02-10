@@ -40,7 +40,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/auth/restorePassword").permitAll();
                     auth.requestMatchers("/api/auth/verifyPasswordCode").permitAll();
                     auth.requestMatchers("/api/auth/changePassword").permitAll();
-                    auth.requestMatchers("/api/categorias").hasAnyAuthority("Z-Pr", "A-Di");
+                    auth.requestMatchers("/api/categorias").hasAnyAuthority("Z-Pr", "A-Di", "P-X");
                     auth.requestMatchers(HttpMethod.POST, "/api/distribuidoras").hasAuthority("A-Di");
                     auth.requestMatchers(HttpMethod.PATCH, "/api/distribuidoras").hasAuthority("M-Di");
                     auth.requestMatchers(HttpMethod.DELETE, "/api/distribuidoras").hasAuthority("R-Di");
@@ -50,7 +50,7 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.POST, "/api/presupuestos").hasAuthority("Z-Pr");
                     auth.requestMatchers(HttpMethod.GET, "/api/presupuestos/enlistar").hasAuthority("Y-Pr");
                     auth.requestMatchers(HttpMethod.GET, "/api/usuarios").authenticated();
-                    auth.requestMatchers(HttpMethod.POST, "/api/reporte/**").authenticated();
+                    auth.requestMatchers(HttpMethod.POST, "/api/reporte/**").hasAnyAuthority("DISTRIBUIDORA", "EMPLEADO");
                     auth.anyRequest().authenticated();
                 })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
