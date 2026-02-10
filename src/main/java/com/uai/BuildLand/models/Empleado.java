@@ -8,7 +8,7 @@ import jakarta.persistence.*;
  */
 @Entity
 @Table(name = "empleados")
-public class Empleado {
+public class Empleado implements ActoresSistema {
     //    @JoinColumn(name = "usuario_cuit")
     @Id
     private String cuit;

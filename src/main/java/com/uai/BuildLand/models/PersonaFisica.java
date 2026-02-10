@@ -1,18 +1,13 @@
 package com.uai.BuildLand.models;
 
 import com.uai.BuildLand.models.auth.Usuario;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import org.apache.kafka.common.protocol.types.Field;
+import org.springframework.beans.factory.annotation.Value;
 
 @Entity
 @Table(name = "personas_fisicas")
-public class PersonaFisica {
+public class PersonaFisica implements ActoresSistema {
     @Id
     private String cuit;
 
@@ -33,7 +28,34 @@ public class PersonaFisica {
     @Column(length = 100)
     private String ciudad;
 
+    @Transient
+    @Value("${mock.usuario.personaFisica.email}")
+    private String correo;
+
+    @Transient
+    @Value("${mock.usuario.personaFisica.password}")
+    private String password;
+
+    @Transient
+    @Value("${mock.usuario.personaFisica.cuit}")
+    private String cuitMock;
+
+    @Transient
+    @Value("${mock.usuario.personaFisica.nombre}")
+    private String nombreMock;
+
     public PersonaFisica() {
+        this.cuit = cuitMock;
+        this.nombre = nombreMock;
+        this.numeroTelefono = null;
+        this.codigoPostal = null;
+        this.ciudad = null;
+        this.usuario = new Usuario(
+                cuitMock,
+                Usuario.TipoUsuario.PERSONA_FISICA,
+                correo,
+                password
+        );
     }
 
     public PersonaFisica(Usuario usuario, String cuit, String nombre, String numeroTelefono,

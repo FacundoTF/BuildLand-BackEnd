@@ -6,7 +6,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "distribuidoras")
-public class Distribuidora {
+public class Distribuidora implements ActoresSistema {
     @Id
     private String cuit;
 
