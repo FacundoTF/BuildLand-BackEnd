@@ -93,12 +93,6 @@ public class UsuarioController {
         }
     }
 
-    /**
-     * Crea un nuevo usuario
-     * @param dto Usuario a crear
-     * @param ucb UriComponentsBuilder para construir la URI de la respuesta
-     * @return Usuario creado con status 201
-     */
     @PostMapping
     public ResponseEntity<ActoresSistema> crear(@RequestBody TipoUsuarioDatosDto dto, UriComponentsBuilder ucb) {
         
@@ -175,11 +169,7 @@ public class UsuarioController {
         }
     }
 
-    /**
-     * Actualiza un usuario existente
-     * @param dto Datos actualizados
-     * @return Usuario actualizado o 404 si no existe
-     */
+
     @PatchMapping
     public ResponseEntity<ActoresSistema> actualizar(@RequestBody TipoUsuarioDatosDto dto) {
         String nonNullCuit = Objects.requireNonNull(dto.getUsuario().getCuit(), "cuit must not be null");
@@ -228,11 +218,6 @@ public class UsuarioController {
         }
     }
 
-    /**
-     * Elimina un usuario por CUIT
-     * @param cuit CUIT del usuario a eliminar
-     * @return 204 si se eliminó correctamente, 404 si no existía
-     */
     @DeleteMapping("/{cuit}")
     public ResponseEntity<Void> eliminar(@PathVariable String cuit) {
         String nonNullCuit = Objects.requireNonNull(cuit, "cuit must not be null");
@@ -276,11 +261,6 @@ public class UsuarioController {
         }
     }
 
-    /**
-     * Lista todos los usuarios con paginación
-     * @param pageable Parámetros de paginación y ordenamiento
-     * @return Lista de usuarios
-     */
     @GetMapping("/enlistar")
     public ResponseEntity<List<Usuario>> enlistar(Pageable pageable) {
         Page<Usuario> usuarios = usuarioRepository.findAll(PageRequest.of(
@@ -290,11 +270,6 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarios.getContent());
     }
 
-    /**
-     * Login de usuario
-     * @param loginRequest Usuario con email y password
-     * @return 200 si el login es exitoso, 404 si no existe o contraseña incorrecta
-     */
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody Usuario loginRequest){
         Optional<Usuario> usuario = usuarioRepository.findByEmail(loginRequest.getEmail());
