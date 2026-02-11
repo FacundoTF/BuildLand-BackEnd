@@ -212,6 +212,54 @@ public class GrupoController {
 
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * Agrega un permiso a un grupo
+     *
+     * @param grupoId ID del grupo
+     * @param permisoId ID del permiso a agregar
+     * @return Grupo actualizado
+     */
+    @PostMapping("/{grupoId}/permisos/{permisoId}")
+    public ResponseEntity<Grupo> agregarPermiso(@PathVariable Long grupoId, @PathVariable Long permisoId) {
+        Optional<Grupo> grupoOpt = grupoRepository.findById(grupoId);
+        Optional<Permiso> permisoOpt = permisoRepository.findById(permisoId);
+
+        if (grupoOpt.isEmpty() || permisoOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Grupo grupo = grupoOpt.get();
+        Permiso permiso = permisoOpt.get();
+
+        grupo.agregarElemento(permiso);
+        Grupo grupoActualizado = grupoRepository.save(grupo);
+
+        return ResponseEntity.ok(grupoActualizado);
+    }
+
+    /**
+     * Elimina un permiso de un grupo
+     *
+     * @param grupoId ID del grupo
+     * @param permisoId ID del permiso a remover
+     * @return 204 si se eliminó correctamente
+     */
+    @DeleteMapping("/{grupoId}/permisos/{permisoId}")
+    public ResponseEntity<Void> eliminarPermiso(@PathVariable Long grupoId, @PathVariable Long permisoId) {
+        Optional<Grupo> grupoOpt = grupoRepository.findById(grupoId);
+        Optional<Permiso> permisoOpt = permisoRepository.findById(permisoId);
+
+        if (grupoOpt.isEmpty() || permisoOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Grupo grupo = grupoOpt.get();
+        Permiso permiso = permisoOpt.get();
+
+        grupo.removerElemento(permiso);
+        grupoRepository.save(grupo);
+
         return ResponseEntity.noContent().build();
     }
 }
