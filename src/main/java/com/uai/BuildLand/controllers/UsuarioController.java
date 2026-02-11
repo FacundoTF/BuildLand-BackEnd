@@ -82,23 +82,20 @@ public class UsuarioController {
         }
     }
 
-    @GetMapping("/{email}")
-    public ResponseEntity<String> obtenerNombrePorEmail(@PathVariable String email) {
+    @GetMapping("/email/{email}")
+    public ResponseEntity<ActoresSistema> obtenerNombrePorEmail(@PathVariable String email) {
         Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
         if (usuario.isPresent()) {
             Usuario usuarioEncontrado = usuario.get();
-            String nombreUsuario = "";
+            ActoresSistema actor = null;
             if (usuarioEncontrado.getTipoUsuario() == Usuario.TipoUsuario.PERSONA_FISICA){
-                PersonaFisica personaFisica = pfRepository.findByUsuario(usuarioEncontrado);
-                nombreUsuario = personaFisica.getNombre();
+                actor = pfRepository.findByUsuario(usuarioEncontrado);
             } else if (usuarioEncontrado.getTipoUsuario() == Usuario.TipoUsuario.DISTRIBUIDORA) {
-                Distribuidora distribuidora = dRepository.findByUsuario(usuarioEncontrado);
-                nombreUsuario = distribuidora.getNombre();
+                actor = dRepository.findByUsuario(usuarioEncontrado);
             } else if (usuarioEncontrado.getTipoUsuario() == Usuario.TipoUsuario.EMPLEADO) {
-                Empleado empleado = eRepository.findByUsuario(usuarioEncontrado);
-                nombreUsuario = empleado.getNombre();
+                actor = eRepository.findByUsuario(usuarioEncontrado);
             }
-            return ResponseEntity.ok(nombreUsuario);
+            return ResponseEntity.ok(actor);
         } else {
             return ResponseEntity.notFound().build();
         }
