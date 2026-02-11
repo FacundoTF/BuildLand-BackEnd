@@ -32,6 +32,9 @@ public class Usuario {
     @Column(nullable = false, length = 255)
     private String password;
 
+    @Column(name = "estado")
+    private boolean estado;
+
     @ManyToMany
     private final List<ConjuntoGrupoPermiso> conjunto = new ArrayList<>();
 
@@ -47,11 +50,16 @@ public class Usuario {
     }
 
     // Constructor con parámetros
-    public Usuario(String cuit, TipoUsuario tipoUsuario, String email, String password) {
+    public Usuario(String cuit, TipoUsuario tipoUsuario, String email, String password, boolean estado) {
         this.cuit = cuit;
         this.tipoUsuario = tipoUsuario;
         this.email = email;
         this.password = password;
+        this.estado = estado;
+    }
+
+    public boolean getEstado() {
+        return estado;
     }
 
     @Override

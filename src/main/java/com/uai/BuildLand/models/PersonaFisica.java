@@ -45,6 +45,9 @@ public class PersonaFisica implements ActoresSistema {
     private String nombreMock;
 
     public PersonaFisica() {
+    }
+
+    public PersonaFisica(boolean estado) {
         this.cuit = cuitMock;
         this.nombre = nombreMock;
         this.numeroTelefono = null;
@@ -54,7 +57,8 @@ public class PersonaFisica implements ActoresSistema {
                 cuitMock,
                 Usuario.TipoUsuario.PERSONA_FISICA,
                 correo,
-                password
+                password,
+                estado
         );
     }
 
