@@ -1,5 +1,7 @@
 package com.uai.BuildLand.models.access;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
 
 /**
@@ -9,6 +11,15 @@ import jakarta.persistence.*;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "conjunto_grupo_permiso")
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "type"
+)
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = Grupo.class, name = "grupo"),
+    @JsonSubTypes.Type(value = Permiso.class, name = "permiso")
+})
 public abstract class ConjuntoGrupoPermiso {
 
     @Id
