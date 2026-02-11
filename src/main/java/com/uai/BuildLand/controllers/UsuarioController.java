@@ -194,7 +194,6 @@ public class UsuarioController {
                     empleado.setCiudad(dto.getCiudad());
                     empleado.setCodigoPostal(dto.getCodigoPostal());
                     empleado.setDireccion(dto.getDireccion());
-                    empleado.setUsuario(dto.getUsuario());
                     usuarioRol = eRepository.save(empleado);
                 }
                 case DISTRIBUIDORA -> {
@@ -206,7 +205,6 @@ public class UsuarioController {
                     distribuidora.setDireccion(dto.getDireccion());
                     distribuidora.setDescripcion(dto.getDescripcion());
                     distribuidora.setCategorias(dto.getCategorias());
-                    distribuidora.setUsuario(dto.getUsuario());
                     usuarioRol = dRepository.save(distribuidora);
                 }
                 case PERSONA_FISICA -> {
@@ -215,7 +213,6 @@ public class UsuarioController {
                     personaFisica.setNumeroTelefono(dto.getNumeroTelefono());
                     personaFisica.setCiudad(dto.getCiudad());
                     personaFisica.setCodigoPostal(dto.getCodigoPostal());
-                    personaFisica.setUsuario(dto.getUsuario());
                     usuarioRol = pfRepository.save(personaFisica);
                 }
             }
@@ -254,7 +251,7 @@ public class UsuarioController {
 
                     List<Presupuesto> presupuestos = prRepository.findByPersona(personaFisica);
                     for (Presupuesto presupuesto : presupuestos) {
-                        presupuesto.setPersona(new PersonaFisica());
+                        presupuesto.setPersona(new PersonaFisica(usuario.getEstado()));
                     }
                     prRepository.saveAll(presupuestos);
 
