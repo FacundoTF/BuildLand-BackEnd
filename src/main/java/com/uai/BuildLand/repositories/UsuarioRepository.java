@@ -12,11 +12,12 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface UsuarioRepository extends CrudRepository<Usuario, String>, PagingAndSortingRepository<Usuario, String> {
-    boolean existsByEmailAndPassword(String email, String password);
     Optional<Usuario> findByEmail(String coreeo);
 
     @Modifying
     @Transactional
     @Query(value = "DELETE usuarios_conjunto WHERE usuario_cuit = :cuit", nativeQuery = true)
     void eliminarConjuntoGrupoPermiso(@Param("cuit") String cuit);
+
+    Optional<Usuario> findByCuit(String cuit);
 }
