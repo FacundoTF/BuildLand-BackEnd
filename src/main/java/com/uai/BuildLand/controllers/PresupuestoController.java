@@ -62,10 +62,27 @@ public class PresupuestoController {
     }
 
     @PostMapping
-    public ResponseEntity<Presupuesto> crear(@RequestBody Presupuesto presupuesto, UriComponentsBuilder ucb) {
+    public ResponseEntity<Presupuesto> crear(@RequestBody Presupuesto presupuesto, UriComponentsBuilder ucb, @CookieValue (name = "accessToken") String jwtToken) {
+        String correo = jwtTokenService.extractUsername(jwtToken);
+        Optional<Usuario> usuario = usuarioRepository.findByEmail(correo);
+        if (usuario.isEmpty()) {
+            return ResponseEntity.status(401).build();
+        }
+        Usuario usuarioEncontrado = usuario.get();
+
+        Optional<PersonaFisica> personaFisicaOpt = Optional.ofNullable(personaFisicaRepository.findByUsuario(usuarioEncontrado));
+        if (personaFisicaOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        PersonaFisica personaFisica = personaFisicaOpt.get();
+
+        presupuesto.setPersona(personaFisica);
+
         if (presupuesto.getPersona() == null || presupuesto.getCategoria() == null) {
             return ResponseEntity.badRequest().build();
         }
+
 
         for (DetallePresupuesto detalle : presupuesto.getDetalles()) {
             if (detalle.getProductoMarca() == null) {
