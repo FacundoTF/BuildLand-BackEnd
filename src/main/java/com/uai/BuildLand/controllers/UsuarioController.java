@@ -131,12 +131,12 @@ public class UsuarioController {
             case EMPLEADO -> {
                 Empleado empleado = new Empleado(
                         usuarioGuardado,
+                        null,
                         dto.getNombre(),
                         dto.getNumeroTelefono(),
-                        dto.getCiudad(),
-                        dto.getCodigoPostal(),
                         dto.getDireccion(),
-                        dto.getDescripcion()
+                        dto.getCodigoPostal(),
+                        dto.getCiudad()
                 );
                 eRepository.save(empleado);
                 URI uri = ucb.path("/usuarios/{cuit}").buildAndExpand(usuarioGuardado.getCuit()).toUri();
@@ -145,13 +145,13 @@ public class UsuarioController {
             case DISTRIBUIDORA -> {
                 Distribuidora distribuidora = new Distribuidora(
                         usuarioGuardado,
-                        usuarioGuardado.getCuit(),
+                        null,
                         dto.getNombre(),
-                        dto.getNumeroTelefono(),
-                        dto.getCiudad(),
-                        dto.getCodigoPostal(),
                         dto.getDireccion(),
+                        dto.getNumeroTelefono(),
                         dto.getDescripcion(),
+                        dto.getCodigoPostal(),
+                        dto.getCiudad(),
                         dto.getCategorias()
                 );
                 dRepository.save(distribuidora);
@@ -161,11 +161,11 @@ public class UsuarioController {
             case PERSONA_FISICA -> {
                 PersonaFisica personaFisica = new PersonaFisica(
                         usuarioGuardado,
+                        null,
                         dto.getNombre(),
                         dto.getNumeroTelefono(),
-                        dto.getCiudad(),
                         dto.getCodigoPostal(),
-                        dto.getDescripcion()
+                        dto.getCiudad()
                 );
                 pfRepository.save(personaFisica);
                 URI uri = ucb.path("/usuarios/{cuit}").buildAndExpand(usuarioGuardado.getCuit()).toUri();
