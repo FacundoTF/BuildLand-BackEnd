@@ -1,5 +1,6 @@
 package com.uai.BuildLand.controllers;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +11,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.uai.BuildLand.models.access.ConjuntoGrupoPermiso;
 import com.uai.BuildLand.models.access.Grupo;
+import com.uai.BuildLand.models.access.Permiso;
 import com.uai.BuildLand.repositories.GrupoRepository;
+import com.uai.BuildLand.repositories.PermisoRepository;
 
 import java.net.URI;
 import java.util.List;
@@ -23,12 +26,10 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/grupos")
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class GrupoController {
     private final GrupoRepository grupoRepository;
-
-    public GrupoController(GrupoRepository grupoRepository) {
-        this.grupoRepository = grupoRepository;
-    }
+    private final PermisoRepository permisoRepository;
 
     /**
      * Obtiene un grupo por ID
@@ -77,16 +78,27 @@ public class GrupoController {
 
     /**
      * Actualiza un grupo existente
-     * @param grupo Datos actualizados
+     * @param id ID del grupo desde el path
+     * @param grupoDatos Datos a actualizar
      * @return Grupo actualizado o 404 si no existe
      */
     @PatchMapping("/{id}")
-    public ResponseEntity<Grupo> actualizar(@RequestBody Grupo grupo) {
-        Long nonNullId = Objects.requireNonNull(grupo.getId(), "id must not be null");
-        Optional<Grupo> grupoDesactualizado = grupoRepository.findById(nonNullId);
-        if (grupoDesactualizado.isPresent()) {
-            grupoRepository.save(grupo);
-            return ResponseEntity.ok(grupo);
+    public ResponseEntity<Grupo> actualizar(@PathVariable Long id, @RequestBody Grupo grupoDatos) {
+        Optional<Grupo> grupoExistenteOpt = grupoRepository.findById(id);
+
+        if (grupoExistenteOpt.isPresent()) {
+            Grupo grupoExistente = grupoExistenteOpt.get();
+
+            if (grupoDatos.getNombre() != null && !grupoDatos.getNombre().isEmpty()) {
+                grupoExistente.setNombre(grupoDatos.getNombre());
+            }
+
+            if (grupoDatos.getDescripcion() != null) {
+                grupoExistente.setDescripcion(grupoDatos.getDescripcion());
+            }
+
+            Grupo grupoGuardado = grupoRepository.save(grupoExistente);
+            return ResponseEntity.ok(grupoGuardado);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -198,6 +210,8 @@ public class GrupoController {
         padre.removerElemento(hijo);
         grupoRepository.save(padre);
 
+        return ResponseEntity.noContent().build();
+    }
         return ResponseEntity.noContent().build();
     }
 }
