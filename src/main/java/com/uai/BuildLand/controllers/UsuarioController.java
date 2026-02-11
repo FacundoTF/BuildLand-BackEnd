@@ -71,6 +71,17 @@ public class UsuarioController {
         }
     }
 
+    @GetMapping("/cuit/{cuit}")
+    public ResponseEntity<Usuario> obtenerPorCuit(@PathVariable String cuit) {
+        String nonNullCuit = Objects.requireNonNull(cuit, "cuit must not be null");
+        Optional<Usuario> usuario = usuarioRepository.findByCuit(nonNullCuit);
+        if (usuario.isPresent()) {
+            return ResponseEntity.ok(usuario.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @GetMapping("/{email}")
     public ResponseEntity<String> obtenerNombrePorEmail(@PathVariable String email) {
         Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
