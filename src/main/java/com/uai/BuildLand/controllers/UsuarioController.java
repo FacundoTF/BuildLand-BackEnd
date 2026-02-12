@@ -8,6 +8,7 @@ import com.uai.BuildLand.models.access.ConjuntoGrupoPermiso;
 import com.uai.BuildLand.models.access.Grupo;
 import com.uai.BuildLand.models.cotizacion.Cotizacion;
 import com.uai.BuildLand.models.dto.TipoUsuarioDatosDto;
+import com.uai.BuildLand.models.dto.VerificationCodeDto;
 import com.uai.BuildLand.models.presupuesto.Presupuesto;
 import com.uai.BuildLand.repositories.*;
 import com.uai.BuildLand.services.JwtTokenService;
@@ -271,6 +272,23 @@ public class UsuarioController {
             }
             usuarioRepository.save(dto.getUsuario());
             return ResponseEntity.ok(usuarioRol);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PatchMapping("/resetear")
+    public ResponseEntity<ActoresSistema> resetearPassword(@RequestBody VerificationCodeDto dto) {
+        Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(dto.getEmail());
+        if (usuarioOptional.isPresent()) {
+            Usuario usuario = usuarioOptional.get();
+            if (usuario.getEmail().equals(dto.getEmail())) {
+                usuario.setPassword(dto.getCode());
+                usuarioRepository.save(usuario);
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
         } else {
             return ResponseEntity.notFound().build();
         }
