@@ -40,12 +40,9 @@ public class GrupoController {
     @GetMapping("/{id}")
     public ResponseEntity<Grupo> obtenerPorId(@PathVariable Long id) {
         Long nonNullId = Objects.requireNonNull(id, "id must not be null");
-        Optional<Grupo> grupo = grupoRepository.findById(nonNullId);
-        if (grupo.isPresent()) {
-            return ResponseEntity.ok(grupo.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return grupoRepository.findById(nonNullId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     /**
@@ -84,9 +81,13 @@ public class GrupoController {
      * @param grupoDatos Datos a actualizar
      * @return Grupo actualizado o 404 si no existe
      */
-    @PatchMapping("/{id}")
-    public ResponseEntity<Grupo> actualizar(@PathVariable Long id, @RequestBody Grupo grupoDatos) {
-        Optional<Grupo> grupoExistenteOpt = grupoRepository.findById(id);
+    @PatchMapping()
+    public ResponseEntity<?> actualizar(@RequestBody Grupo grupoDatos) {
+        if (grupoDatos.getId() == null) {
+            return ResponseEntity.badRequest().body("ID del grupo no proporcionado");
+        }
+
+        Optional<Grupo> grupoExistenteOpt = grupoRepository.findById(grupoDatos.getId());
 
         if (grupoExistenteOpt.isPresent()) {
             Grupo grupoExistente = grupoExistenteOpt.get();
@@ -97,6 +98,24 @@ public class GrupoController {
 
             if (grupoDatos.getDescripcion() != null) {
                 grupoExistente.setDescripcion(grupoDatos.getDescripcion());
+            }
+
+            if (grupoDatos.getElementos() != null && !grupoDatos.getElementos().isEmpty()) {
+                for (ConjuntoGrupoPermiso elemento : grupoDatos.getElementos()) {
+                    if (elemento instanceof Grupo subGrupo) {
+                        if (subGrupo.getId().equals(grupoExistente.getId())) {
+                            return ResponseEntity.badRequest().body("Un grupo no puede ser subgrupo de sí mismo");
+                        }
+
+                        Optional<Grupo> subGrupoRealOpt = grupoRepository.findById(subGrupo.getId());
+                        if (subGrupoRealOpt.isPresent()) {
+                            if (esSubgrupo(subGrupoRealOpt.get(), grupoExistente)) {
+                                return ResponseEntity.badRequest().body("Referencia circular detectada: el grupo hijo ya contiene al padre.");
+                            }
+                        }
+                    }
+                }
+                grupoExistente.setElementos(grupoDatos.getElementos());
             }
 
             Grupo grupoGuardado = grupoRepository.save(grupoExistente);
