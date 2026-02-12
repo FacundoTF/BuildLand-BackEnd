@@ -243,6 +243,13 @@ public class UsuarioController {
             switch (tipoUsuario){
                 case EMPLEADO -> {
                     Empleado empleado = eRepository.findByUsuario(usuarioDesactualizado.get());
+                    List<ConjuntoGrupoPermiso> lista = empleado.getUsuario().getConjunto();
+                    for (ConjuntoGrupoPermiso c : lista) {
+                        if (c instanceof Grupo && (c.getNombre().equals("EMPLEADOS") || c.getNombre().equals("ADMIN"))) {
+                            dto.getUsuario().getConjunto().add(c);
+                            break;
+                        }
+                    }
                     empleado.setNombre(dto.getNombre());
                     empleado.setNumeroTelefono(dto.getNumeroTelefono());
                     empleado.setCiudad(dto.getCiudad());
@@ -252,6 +259,13 @@ public class UsuarioController {
                 }
                 case DISTRIBUIDORA -> {
                     Distribuidora distribuidora = dRepository.findByUsuario(usuarioDesactualizado.get());
+                    List<ConjuntoGrupoPermiso> lista = distribuidora.getUsuario().getConjunto();
+                    for (ConjuntoGrupoPermiso c : lista) {
+                        if (c instanceof Grupo && (c.getNombre().equals("DISTRIBUIDORAS") || c.getNombre().equals("ADMIN"))) {
+                            dto.getUsuario().getConjunto().add(c);
+                            break;
+                        }
+                    }
                     distribuidora.setNombre(dto.getNombre());
                     distribuidora.setNumeroTelefono(dto.getNumeroTelefono());
                     distribuidora.setCiudad(dto.getCiudad());
@@ -263,6 +277,13 @@ public class UsuarioController {
                 }
                 case PERSONA_FISICA -> {
                     PersonaFisica personaFisica = pfRepository.findByUsuario(usuarioDesactualizado.get());
+                    List<ConjuntoGrupoPermiso> lista = personaFisica.getUsuario().getConjunto();
+                    for (ConjuntoGrupoPermiso c : lista) {
+                        if (c instanceof Grupo && (c.getNombre().equals("PERSONA FISICA") || c.getNombre().equals("ADMIN"))) {
+                            dto.getUsuario().getConjunto().add(c);
+                            break;
+                        }
+                    }
                     personaFisica.setNombre(dto.getNombre());
                     personaFisica.setNumeroTelefono(dto.getNumeroTelefono());
                     personaFisica.setCiudad(dto.getCiudad());
