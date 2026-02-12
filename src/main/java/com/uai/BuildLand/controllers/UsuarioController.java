@@ -4,6 +4,8 @@ import com.uai.BuildLand.models.ActoresSistema;
 import com.uai.BuildLand.models.Distribuidora;
 import com.uai.BuildLand.models.Empleado;
 import com.uai.BuildLand.models.PersonaFisica;
+import com.uai.BuildLand.models.access.ConjuntoGrupoPermiso;
+import com.uai.BuildLand.models.access.Grupo;
 import com.uai.BuildLand.models.cotizacion.Cotizacion;
 import com.uai.BuildLand.models.dto.TipoUsuarioDatosDto;
 import com.uai.BuildLand.models.presupuesto.Presupuesto;
@@ -63,9 +65,39 @@ public class UsuarioController {
     public ResponseEntity<Usuario> obtenerPorId(@CookieValue("accessToken") String accessToken) {
         String tokenNoNulo = Objects.requireNonNull(accessToken, "accessToken must not be null");
         String correo = jwtTokenService.extractUsername(tokenNoNulo);
-        Optional<Usuario> usuario = usuarioRepository.findByEmail(correo);
-        if (usuario.isPresent()) {
-            return ResponseEntity.ok(usuario.get());
+        Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(correo);
+        if (usuarioOptional.isPresent()) {
+            List<ConjuntoGrupoPermiso> conjunto = usuarioOptional.get().getConjunto();
+            Usuario usuario = usuarioOptional.get();
+            for (ConjuntoGrupoPermiso c : conjunto) {
+                if (c instanceof Grupo && c.getNombre().equals("ADMIN")) {
+                    usuario.getConjunto().remove(c);
+                    break;
+                }
+            }
+            if (usuario.getTipoUsuario() == Usuario.TipoUsuario.EMPLEADO){
+                for (ConjuntoGrupoPermiso c : conjunto) {
+                    if (c instanceof Grupo && c.getNombre().equals("EMPLEADOS")) {
+                        usuario.getConjunto().remove(c);
+                        break;
+                    }
+                }
+            } else if (usuario.getTipoUsuario() == Usuario.TipoUsuario.PERSONA_FISICA) {
+                for (ConjuntoGrupoPermiso c : conjunto) {
+                    if (c instanceof Grupo && c.getNombre().equals("PERSONA FISICA")) {
+                        usuario.getConjunto().remove(c);
+                        break;
+                    }
+                }
+            } else if (usuario.getTipoUsuario() == Usuario.TipoUsuario.DISTRIBUIDORA) {
+                for (ConjuntoGrupoPermiso c : conjunto) {
+                    if (c instanceof Grupo && c.getNombre().equals("DISTRIBUIDORAS")) {
+                        usuario.getConjunto().remove(c);
+                        break;
+                    }
+                }
+            }
+            return ResponseEntity.ok(usuario);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -87,15 +119,36 @@ public class UsuarioController {
         Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
         if (usuario.isPresent()) {
             Usuario usuarioEncontrado = usuario.get();
-            ActoresSistema actor = null;
+            List<ConjuntoGrupoPermiso> conjunto = usuarioEncontrado.getConjunto();
             if (usuarioEncontrado.getTipoUsuario() == Usuario.TipoUsuario.PERSONA_FISICA){
-                actor = pfRepository.findByUsuario(usuarioEncontrado);
+                PersonaFisica personaFisica = pfRepository.findByUsuario(usuarioEncontrado);
+                for (ConjuntoGrupoPermiso c : conjunto) {
+                    if (c instanceof Grupo && (c.getNombre().equals("PERSONA FISICA") || c.getNombre().equals("ADMIN"))) {
+                        personaFisica.getUsuario().getConjunto().remove(c);
+                        break;
+                    }
+                }
+                return ResponseEntity.ok(personaFisica);
             } else if (usuarioEncontrado.getTipoUsuario() == Usuario.TipoUsuario.DISTRIBUIDORA) {
-                actor = dRepository.findByUsuario(usuarioEncontrado);
+                Distribuidora distribuidora = dRepository.findByUsuario(usuarioEncontrado);
+                for (ConjuntoGrupoPermiso c : conjunto) {
+                    if (c instanceof Grupo && (c.getNombre().equals("DISTRIBUIDORAS") || c.getNombre().equals("ADMIN"))) {
+                        distribuidora.getUsuario().getConjunto().remove(c);
+                        break;
+                    }
+                }
+                return ResponseEntity.ok(distribuidora);
             } else if (usuarioEncontrado.getTipoUsuario() == Usuario.TipoUsuario.EMPLEADO) {
-                actor = eRepository.findByUsuario(usuarioEncontrado);
+                Empleado empleado = eRepository.findByUsuario(usuarioEncontrado);
+                for (ConjuntoGrupoPermiso c : conjunto) {
+                    if (c instanceof Grupo && (c.getNombre().equals("EMPLEADOS") || c.getNombre().equals("ADMIN"))) {
+                        empleado.getUsuario().getConjunto().remove(c);
+                        break;
+                    }
+                }
+                return ResponseEntity.ok(empleado);
             }
-            return ResponseEntity.ok(actor);
+            return ResponseEntity.internalServerError().build();
         } else {
             return ResponseEntity.notFound().build();
         }
