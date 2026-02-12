@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -24,7 +25,7 @@ import java.util.Objects;
  * Controlador REST para manejar las operaciones CRUD de grupos
  */
 @RestController
-@RequestMapping("/grupos")
+@RequestMapping("api/grupos")
 @CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class GrupoController {
@@ -70,15 +71,16 @@ public class GrupoController {
             return ResponseEntity.badRequest().build();
         }
 
+        grupo.setId(null);
+
         Grupo grupoGuardado = grupoRepository.save(grupo);
 
-        URI uri = ucb.path("/grupos/{id}").buildAndExpand(grupoGuardado.getId()).toUri();
+        URI uri = ucb.path("api/grupos/{id}").buildAndExpand(grupoGuardado.getId()).toUri();
         return ResponseEntity.created(uri).body(grupoGuardado);
     }
 
     /**
      * Actualiza un grupo existente
-     * @param id ID del grupo desde el path
      * @param grupoDatos Datos a actualizar
      * @return Grupo actualizado o 404 si no existe
      */
@@ -130,10 +132,11 @@ public class GrupoController {
      */
     @GetMapping("/enlistar")
     public ResponseEntity<List<Grupo>> enlistar(Pageable pageable) {
-        Page<Grupo> grupos = grupoRepository.findAll(PageRequest.of(
-            pageable.getPageNumber(),
-            pageable.getPageSize(),
-            pageable.getSortOr(Sort.by(Sort.Direction.ASC, "nombre"))));
+        Specification<Grupo> gruposProhibidosSpec = com.uai.BuildLand.controllers.specifications.GrupoSpecs.filtrarGruposProhibidos();
+        Page<Grupo> grupos = grupoRepository.findAll(gruposProhibidosSpec, PageRequest.of(
+                        pageable.getPageNumber(),
+                        pageable.getPageSize(),
+                        pageable.getSortOr(Sort.by(Sort.Direction.ASC, "nombre"))));
         return ResponseEntity.ok(grupos.getContent());
     }
 
