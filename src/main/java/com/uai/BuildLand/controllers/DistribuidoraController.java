@@ -126,9 +126,9 @@ public class DistribuidoraController {
      */
     @PatchMapping()
     public ResponseEntity<Distribuidora> actualizar(@RequestBody Distribuidora distribuidora) {
-        String nonNullCuit = Objects.requireNonNull(distribuidora.getCuit(), "cuit must not be null");
-        Optional<Distribuidora> distribuidoraDesactualizada = distribuidoraRepository.findById(nonNullCuit);
         try{
+            String nonNullCuit = Objects.requireNonNull(distribuidora.getCuit(), "cuit must not be null");
+            Optional<Distribuidora> distribuidoraDesactualizada = distribuidoraRepository.findById(nonNullCuit);
             if (distribuidoraDesactualizada.isPresent()) {
                 distribuidoraRepository.save(distribuidora);
                 return ResponseEntity.ok(distribuidora);
