@@ -115,44 +115,51 @@ public class UsuarioController {
         }
     }
 
-    @GetMapping("/email/{email}")
-    public ResponseEntity<ActoresSistema> obtenerNombrePorEmail(@PathVariable String email) {
-        Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
-        if (usuario.isPresent()) {
-            Usuario usuarioEncontrado = usuario.get();
-            List<ConjuntoGrupoPermiso> conjunto = usuarioEncontrado.getConjunto();
-            if (usuarioEncontrado.getTipoUsuario() == Usuario.TipoUsuario.PERSONA_FISICA){
-                PersonaFisica personaFisica = pfRepository.findByUsuario(usuarioEncontrado);
-                for (ConjuntoGrupoPermiso c : conjunto) {
-                    if (c instanceof Grupo && (c.getNombre().equals("PERSONA FISICA") || c.getNombre().equals("ADMIN"))) {
-                        personaFisica.getUsuario().getConjunto().remove(c);
-                        break;
+    @GetMapping("/email")
+    public ResponseEntity<ActoresSistema> obtenerNombrePorEmail(@CookieValue("accessToken") String accessToken) {
+        try{
+            String tokenNoNulo = Objects.requireNonNull(accessToken, "accessToken must not be null");
+            String correoElegido = jwtTokenService.extractUsername(tokenNoNulo);
+            Optional<Usuario> usuario = usuarioRepository.findByEmail(correoElegido);
+            if (usuario.isPresent()) {
+                Usuario usuarioEncontrado = usuario.get();
+                List<ConjuntoGrupoPermiso> conjunto = usuarioEncontrado.getConjunto();
+                if (usuarioEncontrado.getTipoUsuario() == Usuario.TipoUsuario.PERSONA_FISICA){
+                    PersonaFisica personaFisica = pfRepository.findByUsuario(usuarioEncontrado);
+                    for (ConjuntoGrupoPermiso c : conjunto) {
+                        if (c instanceof Grupo && (c.getNombre().equals("PERSONA FISICA") || c.getNombre().equals("ADMIN"))) {
+                            personaFisica.getUsuario().getConjunto().remove(c);
+                            break;
+                        }
                     }
-                }
-                return ResponseEntity.ok(personaFisica);
-            } else if (usuarioEncontrado.getTipoUsuario() == Usuario.TipoUsuario.DISTRIBUIDORA) {
-                Distribuidora distribuidora = dRepository.findByUsuario(usuarioEncontrado);
-                for (ConjuntoGrupoPermiso c : conjunto) {
-                    if (c instanceof Grupo && (c.getNombre().equals("DISTRIBUIDORAS") || c.getNombre().equals("ADMIN"))) {
-                        distribuidora.getUsuario().getConjunto().remove(c);
-                        break;
+                    return ResponseEntity.ok(personaFisica);
+                } else if (usuarioEncontrado.getTipoUsuario() == Usuario.TipoUsuario.DISTRIBUIDORA) {
+                    Distribuidora distribuidora = dRepository.findByUsuario(usuarioEncontrado);
+                    for (ConjuntoGrupoPermiso c : conjunto) {
+                        if (c instanceof Grupo && (c.getNombre().equals("DISTRIBUIDORAS") || c.getNombre().equals("ADMIN"))) {
+                            distribuidora.getUsuario().getConjunto().remove(c);
+                            break;
+                        }
                     }
-                }
-                return ResponseEntity.ok(distribuidora);
-            } else if (usuarioEncontrado.getTipoUsuario() == Usuario.TipoUsuario.EMPLEADO) {
-                Empleado empleado = eRepository.findByUsuario(usuarioEncontrado);
-                for (ConjuntoGrupoPermiso c : conjunto) {
-                    if (c instanceof Grupo && (c.getNombre().equals("EMPLEADOS") || c.getNombre().equals("ADMIN"))) {
-                        empleado.getUsuario().getConjunto().remove(c);
-                        break;
+                    return ResponseEntity.ok(distribuidora);
+                } else if (usuarioEncontrado.getTipoUsuario() == Usuario.TipoUsuario.EMPLEADO) {
+                    Empleado empleado = eRepository.findByUsuario(usuarioEncontrado);
+                    for (ConjuntoGrupoPermiso c : conjunto) {
+                        if (c instanceof Grupo && (c.getNombre().equals("EMPLEADOS") || c.getNombre().equals("ADMIN"))) {
+                            empleado.getUsuario().getConjunto().remove(c);
+                            break;
+                        }
                     }
+                    return ResponseEntity.ok(empleado);
                 }
-                return ResponseEntity.ok(empleado);
+                return ResponseEntity.internalServerError().build();
+            } else {
+                return ResponseEntity.notFound().build();
             }
-            return ResponseEntity.internalServerError().build();
-        } else {
-            return ResponseEntity.notFound().build();
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+
     }
 
     @PostMapping
