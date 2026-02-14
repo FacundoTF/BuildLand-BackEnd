@@ -31,6 +31,18 @@ public class AuthController {
 
     @PostMapping("/token")
     public ResponseEntity<AuthResponseDto> login(@RequestBody AuthRequest authRequest) {
+        Optional<Usuario> usuario = usuarioRepository.findByEmail(authRequest.getUsername());
+
+        if (usuario.isEmpty()){
+            return ResponseEntity.status(404).build();
+        }
+
+        Usuario usuarioReal = usuario.get();
+
+        if (!usuarioReal.getEstado()){
+            return ResponseEntity.status(403).build();
+        }
+
         AuthUserInfoDto authUserInfo = authService.authenticate(authRequest);
 
         if (authUserInfo == null) {
