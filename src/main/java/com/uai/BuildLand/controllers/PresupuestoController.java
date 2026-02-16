@@ -270,11 +270,11 @@ public class PresupuestoController {
 
         PersonaFisica personaFisica = personaFisicaOpt.get();
 
-        Specification<Presupuesto> fechaLimiteSpec = PresupuestoSpecs.fechaLimiteAfter(new Date());
+//        Specification<Presupuesto> fechaLimiteSpec = PresupuestoSpecs.fechaLimiteAfter(new Date());
         Specification<Presupuesto> hechoPorSpec = PresupuestoSpecs.hechoPor(personaFisica.getCuit());
-        fechaLimiteSpec = fechaLimiteSpec.and(hechoPorSpec);
+//        fechaLimiteSpec = fechaLimiteSpec.and(hechoPorSpec);
 
-        return presupuestoRepository.findAll(fechaLimiteSpec, PageRequest.of(
+        return presupuestoRepository.findAll(hechoPorSpec, PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
                 pageable.getSortOr(Sort.by(Sort.Direction.DESC, "fecha"))));
