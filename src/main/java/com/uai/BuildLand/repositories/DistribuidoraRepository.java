@@ -1,16 +1,27 @@
 package com.uai.BuildLand.repositories;
 
 import com.uai.BuildLand.models.auth.Usuario;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import com.uai.BuildLand.models.Distribuidora;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface DistribuidoraRepository extends CrudRepository<Distribuidora, String>, PagingAndSortingRepository<Distribuidora, String> {
     boolean existsByNombreIgnoreCase(String nombre);
+
+    @Modifying
+    @Query("DELETE FROM PresupuestoRechazado pr WHERE pr.cuit = :distribuidora")
+    void borrarPresupuestosRechazadosYAceptados(@Param("distribuidora") Distribuidora distribuidora);
+
+    @Modifying
+    @Query(value = "DELETE FROM distribuidora_categoria WHERE distribuidora_categoria.cuit = :cuit", nativeQuery = true)
+    void borrarCategoriasDeDistribuidora(@Param("cuit") String cuit);
 
     List<Distribuidora> findByCategoriasNombre(String nombre);
 
@@ -24,6 +35,8 @@ public interface DistribuidoraRepository extends CrudRepository<Distribuidora, S
      boolean existsByUsuario(Usuario correoElectronico);
 
     Distribuidora findByUsuario(Usuario usuario);
+
+    Distribuidora findByCuit(String cuit);
 
     /**
      * Busca una distribuidora por CUIT (campo id)

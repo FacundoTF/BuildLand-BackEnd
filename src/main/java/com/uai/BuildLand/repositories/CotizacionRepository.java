@@ -78,4 +78,6 @@ public interface CotizacionRepository extends JpaRepository<Cotizacion, Long> {
     List<Object> sp_ReporteMensajeCotizacionesRechazadas(String DistribuidoraCuit, Date FechaInicio, Date FechaFin);
 
     List<Cotizacion> findByDistribuidora(Distribuidora distribuidora);
+
+    List<Cotizacion> findByDistribuidora_Cuit(String distribuidoraCuit);
 }
