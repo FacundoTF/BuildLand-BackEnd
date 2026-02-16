@@ -1,5 +1,7 @@
 package com.uai.BuildLand.config;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
@@ -16,10 +18,10 @@ public class PasswordEncoder {
      */
     public static String encode(String password) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] encodedHash = digest.digest(password.getBytes());
-            return Base64.getEncoder().encodeToString(encodedHash);
-        } catch (NoSuchAlgorithmException e) {
+            BCryptPasswordEncoder bcryptEncoder = new BCryptPasswordEncoder(10);
+            return bcryptEncoder.encode(password);
+
+        } catch (Exception e) {
             throw new RuntimeException("Error encoding password", e);
         }
     }
