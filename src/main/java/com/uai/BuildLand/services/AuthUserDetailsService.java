@@ -38,6 +38,10 @@ public class AuthUserDetailsService implements UserDetailsService {
             for(String permiso : permisos){
                 authorityCollection.add(new SimpleGrantedAuthority(permiso));
             }
+            List<Grupo> gruposUsuario = user.get().getConjunto().stream().filter(elemento -> elemento instanceof Grupo).map(elemento -> (Grupo) elemento).toList();
+            for (Grupo grupo : gruposUsuario) {
+                authorityCollection.add(new SimpleGrantedAuthority(grupo.getNombre()));
+            }
             return new User(username, user.get().getPassword(), authorityCollection);
         } else {
             throw new UsernameNotFoundException("User not found with username: " + username);
