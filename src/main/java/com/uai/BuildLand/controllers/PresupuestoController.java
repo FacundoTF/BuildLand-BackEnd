@@ -176,7 +176,7 @@ public class PresupuestoController {
 
         Optional<List<Object>> resultado = cotizacionRepository.findByPresupuesto_IdPresupuestoAndDistribuidora_Cuit(presupuesto.getId(), distribuidora.getCuit());
 
-        if (resultado.isPresent()) {
+        if (resultado.isPresent() && !resultado.get().isEmpty()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -206,8 +206,6 @@ public class PresupuestoController {
         if (usuario.isEmpty()) {
             return ResponseEntity.status(401).build();
         }
-
-        // TODO: Cuando es una persona fisica, en la paginacion hacer un spec que filtre los presupuestos cuyas cotizaciones fueron ya reclamadas. Debe haber una tabla donde se almacene el id del presupuesto
 
         if (usuario.get().getTipoUsuario() == Usuario.TipoUsuario.DISTRIBUIDORA){
             presupuestos = enlistarPresupuestosDistribuidora(pageable, usuario.get().getCuit());
