@@ -1,5 +1,6 @@
 package com.uai.BuildLand.controllers;
 
+import com.uai.BuildLand.config.PasswordEncoder;
 import com.uai.BuildLand.models.auth.AuthRequest;
 import com.uai.BuildLand.models.auth.Usuario;
 import com.uai.BuildLand.models.dto.AuthResponseDto;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -117,7 +119,15 @@ public class AuthController {
             Optional<Usuario> usuarioModificado = usuarioRepository.findByEmail(usuario.getEmail());
             if (usuarioModificado.isPresent()) {
                 Usuario user = usuarioModificado.get();
-                user.setPassword(usuario.getPassword());
+
+                String passwordActual = user.getPassword();
+                String passwordNuevo = PasswordEncoder.encode(usuario.getPassword());
+
+                if (!Objects.equals(passwordActual, passwordNuevo)){
+                    user.setPassword(passwordNuevo);
+                } else {
+                    user.setPassword(usuario.getPassword());
+                }
                 usuarioRepository.save(user);
             } else {
                 return ResponseEntity.status(404).build();
