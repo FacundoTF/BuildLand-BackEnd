@@ -1,5 +1,6 @@
 package com.uai.BuildLand.controllers;
 
+import com.uai.BuildLand.config.PasswordEncoder;
 import com.uai.BuildLand.models.ActoresSistema;
 import com.uai.BuildLand.models.Distribuidora;
 import com.uai.BuildLand.models.Empleado;
@@ -162,6 +163,17 @@ public class UsuarioController {
 
     }
 
+    @GetMapping("/email/{email}")
+    public ResponseEntity<Usuario> obtenerPorEmail(@PathVariable String email) {
+        String nonNullEmail = Objects.requireNonNull(email, "email must not be null");
+        Optional<Usuario> usuario = usuarioRepository.findByEmail(nonNullEmail);
+        if (usuario.isPresent()) {
+            return ResponseEntity.ok(usuario.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @PostMapping
     public ResponseEntity<ActoresSistema> crear(@RequestBody TipoUsuarioDatosDto dto, UriComponentsBuilder ucb) {
         
@@ -311,7 +323,7 @@ public class UsuarioController {
         if (usuarioOptional.isPresent()) {
             Usuario usuario = usuarioOptional.get();
             if (usuario.getEmail().equals(dto.getEmail())) {
-                usuario.setPassword(dto.getCode());
+                usuario.setPassword(PasswordEncoder.encode((dto.getCode())));
                 usuarioRepository.save(usuario);
                 return ResponseEntity.ok().build();
             } else {
