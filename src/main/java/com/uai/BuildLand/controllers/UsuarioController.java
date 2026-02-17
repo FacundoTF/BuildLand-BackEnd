@@ -269,6 +269,17 @@ public class UsuarioController {
                             break;
                         }
                     }
+                    String passwordActual = empleado.getUsuario().getPassword();
+                    String passwordNuevo = dto.getUsuario().getPassword();
+                    String correoActual = empleado.getUsuario().getEmail();
+                    String correoNuevo = dto.getUsuario().getEmail();
+                    if (!Objects.equals(passwordActual, passwordNuevo)){
+                        String encodedPassword = PasswordEncoder.encode(passwordNuevo);
+                        empleado.getUsuario().setPassword(encodedPassword);
+                    }
+                    if (!Objects.equals(correoActual, correoNuevo)){
+                        empleado.getUsuario().setEmail(correoNuevo);
+                    }
                     empleado.setNombre(dto.getNombre());
                     empleado.setNumeroTelefono(dto.getNumeroTelefono());
                     empleado.setCiudad(dto.getCiudad());
@@ -284,6 +295,17 @@ public class UsuarioController {
                             dto.getUsuario().getConjunto().add(c);
                             break;
                         }
+                    }
+                    String passwordActual = distribuidora.getUsuario().getPassword();
+                    String passwordNuevo = dto.getUsuario().getPassword();
+                    String correoActual = distribuidora.getUsuario().getEmail();
+                    String correoNuevo = dto.getUsuario().getEmail();
+                    if (!Objects.equals(passwordActual, passwordNuevo)){
+                        String encodedPassword = PasswordEncoder.encode(passwordNuevo);
+                        distribuidora.getUsuario().setPassword(encodedPassword);
+                    }
+                    if (!Objects.equals(correoActual, correoNuevo)){
+                        distribuidora.getUsuario().setEmail(correoNuevo);
                     }
                     distribuidora.setNombre(dto.getNombre());
                     distribuidora.setNumeroTelefono(dto.getNumeroTelefono());
@@ -303,6 +325,19 @@ public class UsuarioController {
                             break;
                         }
                     }
+
+                    String passwordActual = personaFisica.getUsuario().getPassword();
+                    String passwordNuevo = dto.getUsuario().getPassword();
+                    String correoActual = personaFisica.getUsuario().getEmail();
+                    String correoNuevo = dto.getUsuario().getEmail();
+                    if (!Objects.equals(passwordActual, passwordNuevo)){
+                        String encodedPassword = PasswordEncoder.encode(passwordNuevo);
+                        personaFisica.getUsuario().setPassword(encodedPassword);
+                    }
+                    if (!Objects.equals(correoActual, correoNuevo)){
+                        personaFisica.getUsuario().setEmail(correoNuevo);
+                    }
+
                     personaFisica.setNombre(dto.getNombre());
                     personaFisica.setNumeroTelefono(dto.getNumeroTelefono());
                     personaFisica.setCiudad(dto.getCiudad());
