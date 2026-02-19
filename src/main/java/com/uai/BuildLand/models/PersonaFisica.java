@@ -1,24 +1,20 @@
 package com.uai.BuildLand.models;
 
 import com.uai.BuildLand.models.auth.Usuario;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import org.apache.kafka.common.protocol.types.Field;
+import org.springframework.beans.factory.annotation.Value;
 
 @Entity
 @Table(name = "personas_fisicas")
-public class PersonaFisica {
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id_usuario")
-    private Usuario usuario;
-
+public class PersonaFisica implements ActoresSistema {
     @Id
-    @Column(name = "cuit", length = 11)
     private String cuit;
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "cuit")
+    private Usuario usuario;
 
     @Column(nullable = false, length = 100)
     private String nombre;
@@ -32,7 +28,38 @@ public class PersonaFisica {
     @Column(length = 100)
     private String ciudad;
 
+    @Transient
+    @Value("${mock.usuario.personaFisica.email}")
+    private String correo;
+
+    @Transient
+    @Value("${mock.usuario.personaFisica.password}")
+    private String password;
+
+    @Transient
+    @Value("${mock.usuario.personaFisica.cuit}")
+    private String cuitMock;
+
+    @Transient
+    @Value("${mock.usuario.personaFisica.nombre}")
+    private String nombreMock;
+
     public PersonaFisica() {
+    }
+
+    public PersonaFisica(boolean estado) {
+        this.cuit = cuitMock;
+        this.nombre = nombreMock;
+        this.numeroTelefono = null;
+        this.codigoPostal = null;
+        this.ciudad = null;
+        this.usuario = new Usuario(
+                cuitMock,
+                Usuario.TipoUsuario.PERSONA_FISICA,
+                correo,
+                password,
+                estado
+        );
     }
 
     public PersonaFisica(Usuario usuario, String cuit, String nombre, String numeroTelefono,
@@ -97,7 +124,7 @@ public class PersonaFisica {
     @Override
     public String toString() {
         return "PersonaFisica{" +
-                ", usuario=" + (usuario != null ? usuario.getId() : "null") +
+                ", usuario=" + (usuario != null ? usuario.getCuit() : "null") +
                 ", cuit='" + cuit + '\'' +
                 ", nombre='" + nombre + '\'' +
                 ", numeroTelefono='" + numeroTelefono + '\'' +

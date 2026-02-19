@@ -1,5 +1,7 @@
 package com.uai.BuildLand.controllers;
 
+import com.uai.BuildLand.models.auth.Usuario;
+import com.uai.BuildLand.repositories.UsuarioRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,8 +26,10 @@ import java.util.Objects;
 @CrossOrigin(origins = "*")
 public class EmpleadoController {
     private final EmpleadoRepository empleadoRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public EmpleadoController(EmpleadoRepository empleadoRepository) {
+    public EmpleadoController(EmpleadoRepository empleadoRepository, UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
         this.empleadoRepository = empleadoRepository;
     }
 
@@ -86,7 +90,7 @@ public class EmpleadoController {
 
         Empleado empleadoGuardado = empleadoRepository.save(empleado);
 
-        URI uri = ucb.path("/empleados/{cuit}").buildAndExpand(empleadoGuardado.getCuit()).toUri();
+        URI uri = ucb.path("/empleados/{cuit}").buildAndExpand(empleadoGuardado.getUsuario().getCuit()).toUri();
         return ResponseEntity.created(uri).body(empleadoGuardado);
     }
 
@@ -97,7 +101,7 @@ public class EmpleadoController {
      */
     @PatchMapping("/{cuit}")
     public ResponseEntity<Empleado> actualizar(@RequestBody Empleado empleado) {
-        String nonNullCuit = Objects.requireNonNull(empleado.getCuit(), "cuit must not be null");
+        String nonNullCuit = Objects.requireNonNull(empleado.getUsuario().getCuit(), "cuit must not be null");
         Optional<Empleado> empleadoDesactualizado = empleadoRepository.findById(nonNullCuit);
         if (empleadoDesactualizado.isPresent()) {
             empleadoRepository.save(empleado);
@@ -116,10 +120,12 @@ public class EmpleadoController {
     public ResponseEntity<Void> eliminar(@PathVariable String cuit) {
         String nonNullCuit = Objects.requireNonNull(cuit, "cuit must not be null");
 
-        boolean empleadoExiste = empleadoRepository.existsById(nonNullCuit);
+        Empleado empleado = empleadoRepository.findById(nonNullCuit).orElseThrow(() -> new IllegalStateException("Empleado no encontrado con cuit: " + nonNullCuit));
 
-        if (empleadoExiste) {
+        if (empleado != null) {
             empleadoRepository.deleteById(nonNullCuit);
+            Optional<Usuario> usuario = usuarioRepository.findByEmail(empleado.getUsuario().getEmail());
+            usuario.ifPresent(value -> usuarioRepository.deleteById(value.getCuit()));
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.notFound().build();

@@ -20,7 +20,7 @@ import java.util.Objects;
  * Controlador REST para manejar las operaciones CRUD de permisos
  */
 @RestController
-@RequestMapping("/permisos")
+@RequestMapping("api/permisos")
 @CrossOrigin(origins = "*")
 public class PermisoController {
     private final PermisoRepository permisoRepository;

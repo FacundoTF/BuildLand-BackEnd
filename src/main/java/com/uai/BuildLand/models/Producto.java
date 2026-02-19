@@ -24,14 +24,9 @@ public class Producto {
     @JoinColumn(name = "nombre_categoria", nullable = false)
     private Categoria categoria;
 
-    @ManyToOne
-    @JoinColumn(name = "id_marca", nullable = false)
-    private Marca marca;
-
     public Producto(String nombre, Categoria categoria, Marca marca) {
         this.nombre = nombre;
         this.categoria = categoria;
-        this.marca = marca;
     }
 
     public Producto() {
@@ -60,11 +55,5 @@ public class Producto {
 
     public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
-    }
-    public Marca getMarca() {
-        return marca;
-    }
-    public void setMarca(Marca marca) {
-        this.marca = marca;
     }
 }

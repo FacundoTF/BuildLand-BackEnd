@@ -2,6 +2,7 @@ package com.uai.BuildLand.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -39,8 +40,47 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/auth/restorePassword").permitAll();
                     auth.requestMatchers("/api/auth/verifyPasswordCode").permitAll();
                     auth.requestMatchers("/api/auth/changePassword").permitAll();
-                    auth.requestMatchers("/api/categorias").hasAnyAuthority("R-Pr");
-                    auth.anyRequest().authenticated();
+                    auth.requestMatchers("api/auth/logout").authenticated();
+                    auth.requestMatchers("/api/categorias").hasAnyAuthority("Z-Pr", "A-Di", "P-X");
+                    auth.requestMatchers(HttpMethod.GET, "/api/distribuidoras/{cuit}").hasAnyAuthority("EMPLEADO", "ADMIN");
+                    auth.requestMatchers(HttpMethod.POST, "/api/distribuidoras").hasAnyAuthority("A-Di", "ADMIN");
+                    auth.requestMatchers(HttpMethod.PATCH, "/api/distribuidoras").hasAnyAuthority("M-Di", "ADMIN");
+                    auth.requestMatchers(HttpMethod.DELETE, "/api/distribuidoras/{cuit}").hasAnyAuthority("R-Di", "ADMIN");
+                    auth.requestMatchers(HttpMethod.POST, "/api/personas-fisicas").hasAnyAuthority("A-Pf", "ADMIN");
+                    auth.requestMatchers(HttpMethod.PATCH, "/api/personas-fisicas").hasAnyAuthority("M-Pf", "ADMIN");
+                    auth.requestMatchers(HttpMethod.DELETE, "/api/personas-fisicas/{cuit}").hasAnyAuthority("R-Pf", "ADMIN");
+                    auth.requestMatchers(HttpMethod.GET, "/api/personas-fisicas/{cuit}").hasAnyAuthority("ADMIN", "EMPLEADO");
+                    auth.requestMatchers(HttpMethod.GET, "/api/productos/enlistar").hasAnyAuthority("PERSONA FISICA", "Z-Pr");
+                    auth.requestMatchers(HttpMethod.GET, "/api/productos/categorias/{nombreCategoria}").hasAnyAuthority("PERSONA FISICA", "Z-Pr", "DISTRIBUIDORAS");
+                    auth.requestMatchers(HttpMethod.GET, "/api/marcas/categorias/{nombreCategoria}").hasAnyAuthority("PERSONA FISICA", "Z-Pr", "DISTRIBUIDORAS");
+                    auth.requestMatchers(HttpMethod.POST, "/api/presupuestos").hasAuthority("PERSONA FISICA");
+                    auth.requestMatchers(HttpMethod.GET, "/api/presupuestos/enlistar").hasAnyAuthority("Y-Pr", "ADMIN");
+                    auth.requestMatchers(HttpMethod.GET, "/api/presupuestos/detalles/**").hasAnyAuthority("PERSONA FISICA", "DISTRIBUIDORAS", "Y-Pr");
+                    auth.requestMatchers(HttpMethod.GET, "/api/presupuestos/verificarFechaLimite/{id}").hasAnyAuthority("PERSONA FISICA", "Y-Pr", "ADMIN");
+                    auth.requestMatchers(HttpMethod.POST, "/api/presupuestos/rechazar/{id}").hasAnyAuthority("DISTRIBUIDORAS");
+                    auth.requestMatchers(HttpMethod.POST, "/api/usuarios").hasAnyAuthority("A-Us", "ADMIN");
+                    auth.requestMatchers(HttpMethod.PATCH, "/api/usuarios").hasAnyAuthority("M-Us", "ADMIN");
+                    auth.requestMatchers(HttpMethod.DELETE, "/api/usuarios").hasAnyAuthority("R-Us", "ADMIN");
+                    auth.requestMatchers(HttpMethod.GET, "/api/usuarios").hasAnyAuthority("PERSONA FISICA", "DISTRIBUIDORAS", "ADMIN");
+                    auth.requestMatchers(HttpMethod.POST, "/api/usuarios").hasAnyAuthority("A-Us", "ADMIN");
+                    auth.requestMatchers(HttpMethod.PATCH, "/api/usuarios").hasAnyAuthority("M-Us", "ADMIN");
+                    auth.requestMatchers(HttpMethod.DELETE, "/api/usuarios").hasAnyAuthority("R-Us", "ADMIN");
+                    auth.requestMatchers(HttpMethod.GET, "/api/usuarios/email").authenticated();
+                    auth.requestMatchers(HttpMethod.GET, "/api/usuarios/email/{email}").hasAuthority("ADMIN");
+                    auth.requestMatchers(HttpMethod.PATCH, "/api/usuarios/resetear").hasAuthority("ADMIN");
+                    auth.requestMatchers(HttpMethod.GET, "/api/usuarios/login").authenticated();
+                    auth.requestMatchers(HttpMethod.GET, "/api/grupos").hasAnyAuthority("A-Gr", "M-Gr", "R-Gr", "ADMIN");
+                    auth.requestMatchers(HttpMethod.POST, "/api/grupos").hasAnyAuthority("A-Gr", "ADMIN");
+                    auth.requestMatchers(HttpMethod.PATCH, "/api/grupos").hasAnyAuthority("M-Gr", "ADMIN");
+                    auth.requestMatchers(HttpMethod.DELETE, "/api/grupos").hasAnyAuthority("R-Gr", "ADMIN");
+                    auth.requestMatchers(HttpMethod.POST, "/api/reporte/**").hasAnyAuthority("DISTRIBUIDORAS", "EMPLEADO", "ADMIN");
+                    auth.requestMatchers(HttpMethod.POST, "/api/cotizaciones/aceptar/{idCotizacion}").hasAuthority("PERSONA FISICA");
+                    auth.requestMatchers(HttpMethod.POST, "/api/cotizaciones/rechazar/{idCotizacion}").hasAuthority("PERSONA FISICA");
+                    auth.requestMatchers(HttpMethod.GET, "/api/cotizaciones/mensajes-rechazo").hasAuthority("PERSONA FISICA");
+                    auth.requestMatchers(HttpMethod.GET, "/api/cotizaciones/enlistar/{IdPresupuesto}").hasAnyAuthority("PERSONA FISICA", "Y-Pr", "ADMIN");
+                    auth.requestMatchers(HttpMethod.POST, "/api/cotizaciones/{idPresupuesto}").hasAuthority("DISTRIBUIDORAS");
+                    auth.requestMatchers(HttpMethod.GET, "/api/categorias/por-distribuidora").hasAnyAuthority("Z-Pr", "DISTRIBUIDORAS");
+//                    auth.anyRequest().authenticated();/detalles/{id}/enlistar
                 })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth2 -> {
@@ -53,7 +93,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         
@@ -64,8 +104,8 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder(10);
-        return NoOpPasswordEncoder.getInstance();
+        return new BCryptPasswordEncoder(10);
+//        return NoOpPasswordEncoder.getInstance();
     }
 
     @Bean

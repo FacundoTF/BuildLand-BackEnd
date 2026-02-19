@@ -1,58 +1,39 @@
 package com.uai.BuildLand.models.cotizacion;
 
 import com.uai.BuildLand.models.Producto;
+import com.uai.BuildLand.models.ProductoMarca;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "cotizaciones_detalles")
+@Setter @Getter
 public class DetalleCotizacion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_detalle_cotizacion", nullable = false, updatable = false)
     private Long idDetalleCotizacion;
 
+//    @OneToOne
     @ManyToOne
-    @JoinColumn(name = "producto_id", nullable = false)
-    private Producto producto;
+    @JoinColumn(name = "id_producto_marca", nullable = false)
+    private ProductoMarca productoMarca;
 
     @Column(name = "precio_unitario", nullable = false)
-    private double precioUnitario;
+    private double importe;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cotizacion_id", nullable = false)
     private Cotizacion cotizacion;
 
-    public DetalleCotizacion(Producto producto, double precioUnitario, Cotizacion cotizacion) {
-        this.producto = producto;
-        this.precioUnitario = precioUnitario;
+    public DetalleCotizacion(ProductoMarca productoMarca, double importe, Cotizacion cotizacion) {
+        this.productoMarca = productoMarca;
+        this.importe = importe;
         this.cotizacion = cotizacion;
     }
 
     public DetalleCotizacion() {
 
-    }
-
-    public Producto getProducto() {
-        return producto;
-    }
-
-    public void setProducto(Producto producto) {
-        this.producto = producto;
-    }
-
-    public double getPrecioUnitario() {
-        return precioUnitario;
-    }
-
-    public void setPrecioUnitario(double precioUnitario) {
-        this.precioUnitario = precioUnitario;
-    }
-
-    public Cotizacion getCotizacion() {
-        return cotizacion;
-    }
-
-    public void setCotizacion(Cotizacion cotizacion) {
-        this.cotizacion = cotizacion;
     }
 }

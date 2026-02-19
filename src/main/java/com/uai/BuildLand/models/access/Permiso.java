@@ -7,14 +7,11 @@ import jakarta.persistence.*;
  */
 @Entity
 @Table(name = "permisos")
-public class Permiso implements ConjuntoGrupoPermiso {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long idPermiso;
-    
-    @Column(nullable = false, unique = true, length = 100)
-    private String nombre;
+@PrimaryKeyJoinColumn(name = "id")
+public class Permiso extends ConjuntoGrupoPermiso {
+
+    @Column(length = 255)
+    protected String descripcion;
 
     // Constructor por defecto
     public Permiso() {
@@ -25,27 +22,20 @@ public class Permiso implements ConjuntoGrupoPermiso {
         this.nombre = nombre;
     }
 
-    public Long getId() {
-        return idPermiso;
+    public String getDescripcion() {
+        return descripcion;
     }
 
-    public void setId(Long id) {
-        this.idPermiso = id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 
     @Override
     public String toString() {
         return "Permiso{" +
-                "id=" + idPermiso +
+                "id=" + id +
                 ", nombre='" + nombre + '\'' +
+                ", descripcion='" + descripcion + '\'' +
                 '}';
     }
 }

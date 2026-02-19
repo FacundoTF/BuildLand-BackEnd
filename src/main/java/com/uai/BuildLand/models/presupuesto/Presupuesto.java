@@ -26,6 +26,9 @@ public class Presupuesto {
     @Column(name = "fecha")
     private Date fecha;
 
+    @Column(name = "fechaLimite")
+    private Date fechaLimite;
+
     @OneToMany(mappedBy = "presupuesto", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<DetallePresupuesto> detalles;
@@ -37,7 +40,8 @@ public class Presupuesto {
     }
 
     public Presupuesto(List<DetallePresupuesto> detalles, List<Cotizacion> cotizaciones, Date fecha,
-            PersonaFisica persona, Categoria categoria, Long idPresupuesto) {
+            PersonaFisica persona, Categoria categoria, Long idPresupuesto, Date fechaLimite) {
+        this.fechaLimite = fechaLimite;
         this.detalles = detalles;
         this.cotizaciones = cotizaciones;
         this.fecha = fecha;
@@ -76,6 +80,14 @@ public class Presupuesto {
 
     public void setFecha(Date fecha) {
         this.fecha = fecha;
+    }
+
+    public Date getFechaLimite() {
+        return fechaLimite;
+    }
+
+    public void setFechaLimite(Date fechaLimite) {
+        this.fechaLimite = fechaLimite;
     }
 
     public List<DetallePresupuesto> getDetalles() {

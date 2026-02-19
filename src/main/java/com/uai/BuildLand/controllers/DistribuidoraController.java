@@ -1,7 +1,11 @@
 package com.uai.BuildLand.controllers;
 
+import com.uai.BuildLand.config.PasswordEncoder;
 import com.uai.BuildLand.models.auth.Usuario;
+import com.uai.BuildLand.models.cotizacion.Cotizacion;
+import com.uai.BuildLand.repositories.CotizacionRepository;
 import com.uai.BuildLand.repositories.UsuarioRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,9 +30,11 @@ import java.util.Objects;
 @CrossOrigin(origins = "*")
 public class DistribuidoraController {
     private final DistribuidoraRepository distribuidoraRepository;
+    private final CotizacionRepository cotizacionRepository;
     private final UsuarioRepository usuarioRepository;
 
-    public DistribuidoraController(DistribuidoraRepository distribuidoraRepository, UsuarioRepository usuarioRepository) {
+    public DistribuidoraController(DistribuidoraRepository distribuidoraRepository, UsuarioRepository usuarioRepository, CotizacionRepository cotizacionRepository) {
+        this.cotizacionRepository = cotizacionRepository;
         this.distribuidoraRepository = distribuidoraRepository;
         this.usuarioRepository = usuarioRepository;
     }
@@ -66,10 +72,10 @@ public class DistribuidoraController {
 
         boolean validarDatos = verificarDatosInternos(distribuidora);
         boolean existePorNombre = distribuidoraRepository.existsByNombreIgnoreCase(distribuidora.getNombre());
-        boolean existePorCuit = distribuidoraRepository.existsById(distribuidora.getCuit());
+//        boolean existePorCuit = distribuidoraRepository.existsById(distribuidora.getCuit());
         Optional<Usuario> existePorMail = usuarioRepository.findByEmail(distribuidora.getUsuario().getEmail());
 
-        if (existePorNombre || existePorCuit || existePorMail.isPresent()) {
+        if (existePorNombre || existePorMail.isPresent()) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -78,19 +84,23 @@ public class DistribuidoraController {
         }
 
         try {
+            String rawPassword = distribuidora.getUsuario().getPassword();
+            String encodedPassword = PasswordEncoder.encode(rawPassword);
+            distribuidora.getUsuario().setPassword(encodedPassword);
             // El cascade guardará el usuario automáticamente
             Distribuidora distribuidoraGuardada = distribuidoraRepository.save(distribuidora);
             URI uri = ucb.path("/distribuidoras/{cuit}").buildAndExpand(distribuidoraGuardada.getCuit()).toUri();
             return ResponseEntity.created(uri).body(distribuidoraGuardada);
         }catch(Exception e){
+            System.out.println(e);
             return ResponseEntity.badRequest().build();
         }
     }
 
     private boolean verificarDatosInternos(Distribuidora distribuidora) {
-        if (distribuidora.getCuit() == null || distribuidora.getCuit().trim().isEmpty() || distribuidora.getCuit().length() != 11) {
-            return false;
-        }
+//        if (distribuidora.getCuit() == null || distribuidora.getCuit().trim().isEmpty() || distribuidora.getCuit().length() != 11) {
+//            return false;
+//        }
 
         if (distribuidora.getNombre() == null || distribuidora.getNombre().trim().isEmpty() || distribuidora.getNombre().length() > 100) {
             return false;
@@ -125,14 +135,20 @@ public class DistribuidoraController {
      */
     @PatchMapping()
     public ResponseEntity<Distribuidora> actualizar(@RequestBody Distribuidora distribuidora) {
-        String nonNullCuit = Objects.requireNonNull(distribuidora.getCuit(), "cuit must not be null");
-        Optional<Distribuidora> distribuidoraDesactualizada = distribuidoraRepository.findById(nonNullCuit);
-        if (distribuidoraDesactualizada.isPresent()) {
-            distribuidoraRepository.save(distribuidora);
-            return ResponseEntity.ok(distribuidora);
-        } else {
-            return ResponseEntity.notFound().build();
+        try{
+            String nonNullCuit = Objects.requireNonNull(distribuidora.getCuit(), "cuit must not be null");
+            Optional<Distribuidora> distribuidoraDesactualizada = distribuidoraRepository.findById(nonNullCuit);
+            if (distribuidoraDesactualizada.isPresent()) {
+                distribuidoraRepository.save(distribuidora);
+                return ResponseEntity.ok(distribuidora);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        }catch(Exception e){
+            System.out.println(e);
+            return ResponseEntity.badRequest().build();
         }
+
     }
 
     /**
@@ -141,17 +157,40 @@ public class DistribuidoraController {
      * @return 204 si se eliminó correctamente, 404 si no existía
      */
     @DeleteMapping("/{cuit}")
+    @Transactional
     public ResponseEntity<Void> eliminar(@PathVariable String cuit) {
-        // Ensure cuit is non-null for repositories that expect @NonNull parameters
-        String nonNullCuit = Objects.requireNonNull(cuit, "cuit must not be null");
+        try{
+            // Ensure cuit is non-null for repositories that expect @NonNull parameters
+            String nonNullCuit = Objects.requireNonNull(cuit, "cuit must not be null");
 
-        boolean distribuidoraExiste = distribuidoraRepository.existsById(nonNullCuit);
+            Distribuidora distribuidora = distribuidoraRepository.findByCuit(nonNullCuit);
 
-        if (distribuidoraExiste) {
+            if (distribuidora == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            List<Cotizacion> cotizaciones = cotizacionRepository.findByDistribuidora_Cuit(nonNullCuit);
+
+            if (!cotizaciones.isEmpty()){
+                return ResponseEntity.badRequest().build();
+//                Distribuidora distribuidoraVacia = distribuidoraRepository.findByCuit("00000000001");
+//                cotizaciones.forEach(cotizacion -> {
+//                    cotizacion.setDistribuidora(distribuidoraVacia);
+//                });
+//                cotizacionRepository.saveAll(cotizaciones);
+            }
+
+            distribuidoraRepository.borrarPresupuestosRechazadosYAceptados(distribuidora);
+
+            distribuidoraRepository.borrarCategoriasDeDistribuidora(nonNullCuit);
+
             distribuidoraRepository.deleteById(nonNullCuit);
+            Optional<Usuario> usuario = usuarioRepository.findByEmail(distribuidora.getUsuario().getEmail());
+            usuario.ifPresent(value -> usuarioRepository.deleteById(value.getCuit()));
             return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
+        }catch(Exception e){
+            System.out.println(e);
+            return ResponseEntity.badRequest().build();
         }
     }
 

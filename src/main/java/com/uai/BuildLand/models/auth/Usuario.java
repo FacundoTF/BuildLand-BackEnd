@@ -1,33 +1,42 @@
 package com.uai.BuildLand.models.auth;
 
-import com.uai.BuildLand.models.access.Grupo;
-import com.uai.BuildLand.models.access.Permiso;
+import com.uai.BuildLand.models.access.ConjuntoGrupoPermiso;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Entidad que representa un usuario del sistema BuildLand.
  * Puede ser de tipo Distribuidora, Empleado o PersonaFisica.
  */
+@Setter @Getter
 @Entity
 @Table(name = "usuarios")
 public class Usuario {
+    // Getters y Setters
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_usuario")
-    private Long id;
+    @Column(name = "cuit", nullable = false, length = 11)
+    private String cuit;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_usuario", nullable = false)
     private TipoUsuario tipoUsuario;
 
-    @Column(name = "id_referencia", length = 50)
-    private String idReferencia; // ID de la distribuidora, empleado o persona física
 
     @Column(name = "email", unique = true, nullable = false, length = 100)
     private String email;
 
     @Column(nullable = false, length = 255)
     private String password;
+
+    @Column(name = "estado")
+    private boolean estado;
+
+    @ManyToMany
+    private final List<ConjuntoGrupoPermiso> conjunto = new ArrayList<>();
 
     // Enum para tipos de usuario
     public enum TipoUsuario {
@@ -41,60 +50,23 @@ public class Usuario {
     }
 
     // Constructor con parámetros
-    public Usuario(TipoUsuario tipoUsuario, String idReferencia, String email, String password) {
+    public Usuario(String cuit, TipoUsuario tipoUsuario, String email, String password, boolean estado) {
+        this.cuit = cuit;
         this.tipoUsuario = tipoUsuario;
-        this.idReferencia = idReferencia;
         this.email = email;
         this.password = password;
+        this.estado = estado;
     }
 
-    // Getters y Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public TipoUsuario getTipoUsuario() {
-        return tipoUsuario;
-    }
-
-    public void setTipoUsuario(TipoUsuario tipoUsuario) {
-        this.tipoUsuario = tipoUsuario;
-    }
-
-    public String getIdReferencia() {
-        return idReferencia;
-    }
-
-    public void setIdReferencia(String idReferencia) {
-        this.idReferencia = idReferencia;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public boolean getEstado() {
+        return estado;
     }
 
     @Override
     public String toString() {
         return "Usuario{" +
-                "id=" + id +
+                "cuit='" + cuit + '\'' +
                 ", tipoUsuario=" + tipoUsuario +
-                ", idReferencia='" + idReferencia + '\'' +
                 ", email='" + email + '\'' +
                 '}';
     }

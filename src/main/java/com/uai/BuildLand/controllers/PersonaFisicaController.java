@@ -1,5 +1,9 @@
 package com.uai.BuildLand.controllers;
 
+import com.uai.BuildLand.config.PasswordEncoder;
+import com.uai.BuildLand.models.presupuesto.Presupuesto;
+import com.uai.BuildLand.repositories.PresupuestoRepository;
+import com.uai.BuildLand.repositories.UsuarioRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,8 +31,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 @CrossOrigin(origins = "http://localhost:4200")
 public class PersonaFisicaController {
     private final PersonaFisicaRepository personaFisicaRepository;
+    private final PresupuestoRepository presupuestoRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public PersonaFisicaController(PersonaFisicaRepository personaFisicaRepository) {
+
+    public PersonaFisicaController(PersonaFisicaRepository personaFisicaRepository, PresupuestoRepository presupuestoRepository, UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
+        this.presupuestoRepository = presupuestoRepository;
         this.personaFisicaRepository = personaFisicaRepository;
     }
 
@@ -65,8 +74,8 @@ public class PersonaFisicaController {
             return ResponseEntity.badRequest().build();
         }
 
-        if (persona.get().getCuit() == null || persona.get().getCuit().trim().isEmpty()
-                || persona.get().getCuit().length() != 11) {
+        if (user.get().getCuit().isEmpty()
+                || user.get().getCuit().length() != 11) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -101,13 +110,19 @@ public class PersonaFisicaController {
 
         PersonaFisica personaAGuardar = persona.get();
 
+        Usuario usuarioAGuardar = user.get();
+        String rawPassword = usuarioAGuardar.getPassword();
+        String encodedPassword = PasswordEncoder.encode(rawPassword);
+        usuarioAGuardar.setPassword(encodedPassword);
+        personaAGuardar.setUsuario(usuarioAGuardar);
+
         PersonaFisica personaGuardada = personaFisicaRepository.save(personaAGuardar);
 
         URI uri = ucb.path("api/personas-fisicas/{cuit}").buildAndExpand(personaGuardada.getCuit()).toUri();
         return ResponseEntity.created(uri).body(personaGuardada);
     }
 
-    @PatchMapping("/")
+    @PatchMapping()
     public ResponseEntity<PersonaFisica> actualizar(@RequestBody PersonaFisica personaFisica) {
         String nonNullCuit = Objects.requireNonNull(personaFisica.getCuit(), "cuit must not be null");
         Optional<PersonaFisica> personaFisicaExistenteOpt = personaFisicaRepository.findById(nonNullCuit);
@@ -161,10 +176,20 @@ public class PersonaFisicaController {
         // Ensure cuit is non-null for repositories that expect @NonNull parameters
         String nonNullCuit = Objects.requireNonNull(cuit, "cuit must not be null");
 
-        boolean personaExiste = personaFisicaRepository.existsById(nonNullCuit);
+        PersonaFisica persona = personaFisicaRepository.findById(nonNullCuit).orElse(null);
 
-        if (personaExiste) {
+        if (persona != null) {
+            List<Presupuesto> presupuestos = presupuestoRepository.findByPersona(persona);
+            if (!presupuestos.isEmpty()){
+                PersonaFisica personaSinPresupuestos = personaFisicaRepository.findById("00000000000").orElse(null);
+                for (Presupuesto presupuesto : presupuestos) {
+                    presupuesto.setPersona(personaSinPresupuestos);
+                }
+                presupuestoRepository.saveAll(presupuestos);
+            }
             personaFisicaRepository.deleteById(nonNullCuit);
+            Optional<Usuario> usuario = usuarioRepository.findByEmail(persona.getUsuario().getEmail());
+            usuario.ifPresent(value -> usuarioRepository.deleteById(value.getCuit()));
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

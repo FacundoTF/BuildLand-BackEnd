@@ -1,20 +1,24 @@
 package com.uai.BuildLand.models.presupuesto;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.uai.BuildLand.models.Producto;
+import com.uai.BuildLand.models.ProductoMarca;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "presupuestos_detalles")
+@Setter @Getter
 public class DetallePresupuesto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_detalle_presupuesto", nullable = false, updatable = false)
     private Long idDetallePresupuesto;
 
+//    @OneToOne
     @ManyToOne
-    @JoinColumn(name = "producto_id", nullable = false)
-    private Producto producto;
+    @JoinColumn(name = "id_producto_marca", nullable = false)
+    private ProductoMarca productoMarca;
 
     @Column(name = "cantidad", nullable = false)
     private double cantidad;
@@ -24,43 +28,19 @@ public class DetallePresupuesto {
     @JsonBackReference
     private Presupuesto presupuesto;
 
-    public DetallePresupuesto(Producto producto, double cantidad, Presupuesto presupuesto) {
-        this.producto = producto;
+    public DetallePresupuesto(ProductoMarca productoMarca, double cantidad, Presupuesto presupuesto) {
+        this.productoMarca = productoMarca;
         this.cantidad = cantidad;
         this.presupuesto = presupuesto;
     }
 
-    public DetallePresupuesto(Producto producto, double cantidad) {
-        this.producto = producto;
+    public DetallePresupuesto(ProductoMarca productoMarca, double cantidad) {
+        this.productoMarca = productoMarca;
         this.cantidad = cantidad;
         this.presupuesto = null;
     }
 
     public DetallePresupuesto() {
 
-    }
-
-    public Producto getProducto() {
-        return producto;
-    }
-
-    public Presupuesto getPresupuesto() {
-        return presupuesto;
-    }
-
-    public void setPresupuesto(Presupuesto presupuesto) {
-        this.presupuesto = presupuesto;
-    }
-
-    public void setProducto(Producto producto) {
-        this.producto = producto;
-    }
-
-    public double getCantidad() {
-        return cantidad;
-    }
-
-    public void setCantidad(double cantidad) {
-        this.cantidad = cantidad;
     }
 }

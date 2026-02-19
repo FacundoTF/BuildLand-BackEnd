@@ -1,5 +1,6 @@
 package com.uai.BuildLand.controllers;
 
+import com.uai.BuildLand.config.PasswordEncoder;
 import com.uai.BuildLand.models.auth.AuthRequest;
 import com.uai.BuildLand.models.auth.Usuario;
 import com.uai.BuildLand.models.dto.AuthResponseDto;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -31,15 +33,39 @@ public class AuthController {
 
     @PostMapping("/token")
     public ResponseEntity<AuthResponseDto> login(@RequestBody AuthRequest authRequest) {
+        Optional<Usuario> usuario = usuarioRepository.findByEmail(authRequest.getUsername());
+
+        if (usuario.isEmpty()){
+            return ResponseEntity.status(404).build();
+        }
+
+        Usuario usuarioReal = usuario.get();
+
+        if (!usuarioReal.getEstado()){
+            return ResponseEntity.status(403).build();
+        }
+
         AuthUserInfoDto authUserInfo = authService.authenticate(authRequest);
 
         if (authUserInfo == null) {
             return ResponseEntity.status(405).build();
         }
 
-        ResponseCookie cookie = ResponseCookie.from("accessToken", authUserInfo.getAuthResponse().getToken()).httpOnly(true).secure(false).path("/").maxAge(9000).sameSite(SameSiteCookies.STRICT.toString()).build();
+        ResponseCookie cookie = ResponseCookie.from("accessToken", authUserInfo.getAuthResponse().getToken())
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(9000)
+                .sameSite(SameSiteCookies.STRICT.toString())
+                .build();
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", authUserInfo.getAuthResponse().getRefreshToken()).httpOnly(false).path("/").secure(false).maxAge(172800).sameSite(SameSiteCookies.STRICT.toString()).build();
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", authUserInfo.getAuthResponse().getRefreshToken())
+                .httpOnly(false)
+                .path("/")
+                .secure(false)
+                .maxAge(172800)
+                .sameSite(SameSiteCookies.STRICT.toString())
+                .build();
 
         AuthResponseDto responseBody = new AuthResponseDto(authUserInfo.getAuthResponse().getUsername(), authUserInfo.getGrupos(), authUserInfo.getPermisos());
 
@@ -65,15 +91,15 @@ public class AuthController {
         try {
             // Verificar que los datos no sean nulos
             if (verificationData == null ||
-                verificationData.getEmail() == null ||
-                verificationData.getCode() == null) {
+                    verificationData.getEmail() == null ||
+                    verificationData.getCode() == null) {
                 return ResponseEntity.status(400).build(); // Bad Request
             }
 
             // Verificar el código
             boolean isValid = verificationCodeService.verifyCode(
-                verificationData.getEmail(),
-                verificationData.getCode()
+                    verificationData.getEmail(),
+                    verificationData.getCode()
             );
 
             if (isValid) {
@@ -93,7 +119,15 @@ public class AuthController {
             Optional<Usuario> usuarioModificado = usuarioRepository.findByEmail(usuario.getEmail());
             if (usuarioModificado.isPresent()) {
                 Usuario user = usuarioModificado.get();
-                user.setPassword(usuario.getPassword());
+
+                String passwordActual = user.getPassword();
+                String passwordNuevo = PasswordEncoder.encode(usuario.getPassword());
+
+                if (!Objects.equals(passwordActual, passwordNuevo)){
+                    user.setPassword(passwordNuevo);
+                } else {
+                    user.setPassword(usuario.getPassword());
+                }
                 usuarioRepository.save(user);
             } else {
                 return ResponseEntity.status(404).build();
@@ -103,5 +137,26 @@ public class AuthController {
         }
 
         return ResponseEntity.status(200).build();
+    }
+
+    @PostMapping("logout")
+    public ResponseEntity<AuthResponseDto> logout() {
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(false)
+                .path("/")
+                .secure(false)
+                .maxAge(0)
+                .sameSite(SameSiteCookies.STRICT.toString())
+                .build();
+
+        ResponseCookie cookie = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .path("/")
+                .secure(false)
+                .maxAge(0)
+                .sameSite(SameSiteCookies.STRICT.toString())
+                .build();
+
+        return ResponseEntity.status(200).header(HttpHeaders.SET_COOKIE, refreshCookie.toString()).header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
     }
 }

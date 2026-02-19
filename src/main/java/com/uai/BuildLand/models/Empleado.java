@@ -8,14 +8,15 @@ import jakarta.persistence.*;
  */
 @Entity
 @Table(name = "empleados")
-public class Empleado {
-    @OneToOne
-    @JoinColumn(name = "id_usuario")
-    private Usuario usuario;
-    
+public class Empleado implements ActoresSistema {
+    //    @JoinColumn(name = "usuario_cuit")
     @Id
-    @Column(name = "cuit", length = 11)
     private String cuit;
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "cuit")
+    private Usuario usuario;
     
     @Column(nullable = false, length = 100)
     private String nombre;
@@ -39,7 +40,7 @@ public class Empleado {
     // Constructor con parámetros
     public Empleado(Usuario usuario, String cuit, String nombre, String numeroTelefono, String direccion, String codigoPostal, String ciudad) {
         this.usuario = usuario;
-        this.cuit = cuit;
+//        this.cuit = cuit;
         this.nombre = nombre;
         this.numeroTelefono = numeroTelefono;
         this.direccion = direccion;
@@ -99,7 +100,7 @@ public class Empleado {
    @Override
     public String toString() {
         return "Empleado{" +
-                "cuit='" + cuit + '\'' +
+                "cuit='" + '\'' +
                 ", nombre='" + nombre + '\'' +
                 ", numeroTelefono='" + numeroTelefono + '\'' +
                 ", direccion='" + direccion + '\'' +

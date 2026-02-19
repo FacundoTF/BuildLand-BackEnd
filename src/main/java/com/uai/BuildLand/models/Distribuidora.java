@@ -6,15 +6,15 @@ import java.util.List;
 
 @Entity
 @Table(name = "distribuidoras")
-public class Distribuidora {
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id_usuario")
-    private Usuario usuario;
-    
+public class Distribuidora implements ActoresSistema {
     @Id
-    @Column(name = "cuit", length = 11)
     private String cuit;
-    
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "cuit")
+    private Usuario usuario;
+
     @Column(nullable = false, length = 100)
     private String nombre;
     
@@ -131,8 +131,7 @@ public class Distribuidora {
     @Override
     public String toString() {
         return "Distribuidora{" +
-                "id_usuario=" + usuario.getId() +
-                ", cuit='" + cuit + '\'' +
+                "cuit='" + cuit + '\'' +
                 ", nombre='" + nombre + '\'' +
                 ", direccion='" + direccion + '\'' +
                 ", numeroTelefono='" + numeroTelefono + '\'' +
