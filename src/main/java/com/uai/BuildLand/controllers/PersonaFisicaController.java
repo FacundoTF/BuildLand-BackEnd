@@ -1,5 +1,6 @@
 package com.uai.BuildLand.controllers;
 
+import com.uai.BuildLand.config.PasswordEncoder;
 import com.uai.BuildLand.models.presupuesto.Presupuesto;
 import com.uai.BuildLand.repositories.PresupuestoRepository;
 import com.uai.BuildLand.repositories.UsuarioRepository;
@@ -73,8 +74,8 @@ public class PersonaFisicaController {
             return ResponseEntity.badRequest().build();
         }
 
-        if (persona.get().getCuit() == null || persona.get().getCuit().trim().isEmpty()
-                || persona.get().getCuit().length() != 11) {
+        if (user.get().getCuit().isEmpty()
+                || user.get().getCuit().length() != 11) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -109,13 +110,19 @@ public class PersonaFisicaController {
 
         PersonaFisica personaAGuardar = persona.get();
 
+        Usuario usuarioAGuardar = user.get();
+        String rawPassword = usuarioAGuardar.getPassword();
+        String encodedPassword = PasswordEncoder.encode(rawPassword);
+        usuarioAGuardar.setPassword(encodedPassword);
+        personaAGuardar.setUsuario(usuarioAGuardar);
+
         PersonaFisica personaGuardada = personaFisicaRepository.save(personaAGuardar);
 
         URI uri = ucb.path("api/personas-fisicas/{cuit}").buildAndExpand(personaGuardada.getCuit()).toUri();
         return ResponseEntity.created(uri).body(personaGuardada);
     }
 
-    @PatchMapping("/")
+    @PatchMapping()
     public ResponseEntity<PersonaFisica> actualizar(@RequestBody PersonaFisica personaFisica) {
         String nonNullCuit = Objects.requireNonNull(personaFisica.getCuit(), "cuit must not be null");
         Optional<PersonaFisica> personaFisicaExistenteOpt = personaFisicaRepository.findById(nonNullCuit);
