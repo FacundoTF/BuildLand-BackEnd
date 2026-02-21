@@ -62,17 +62,20 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.PATCH, "/api/usuarios").hasAnyAuthority("M-Us", "ADMIN");
                     auth.requestMatchers(HttpMethod.DELETE, "/api/usuarios").hasAnyAuthority("R-Us", "ADMIN");
                     auth.requestMatchers(HttpMethod.GET, "/api/usuarios").hasAnyAuthority("PERSONA FISICA", "DISTRIBUIDORAS", "ADMIN");
+                    auth.requestMatchers(HttpMethod.GET, "/api/usuarios/cuit/{cuit}").hasAnyAuthority("PERSONA FISICA", "DISTRIBUIDORAS", "ADMIN");
                     auth.requestMatchers(HttpMethod.POST, "/api/usuarios").hasAnyAuthority("A-Us", "ADMIN");
                     auth.requestMatchers(HttpMethod.PATCH, "/api/usuarios").hasAnyAuthority("M-Us", "ADMIN");
-                    auth.requestMatchers(HttpMethod.DELETE, "/api/usuarios").hasAnyAuthority("R-Us", "ADMIN");
+                    auth.requestMatchers(HttpMethod.DELETE, "/api/usuarios/{cuit}").hasAnyAuthority("R-Us", "ADMIN");
                     auth.requestMatchers(HttpMethod.GET, "/api/usuarios/email").authenticated();
                     auth.requestMatchers(HttpMethod.GET, "/api/usuarios/email/{email}").hasAuthority("ADMIN");
-                    auth.requestMatchers(HttpMethod.PATCH, "/api/usuarios/resetear").hasAuthority("ADMIN");
+                    auth.requestMatchers(HttpMethod.PATCH, "/api/usuarios/resetear").hasAnyAuthority("ADMIN", "Z-Us");
                     auth.requestMatchers(HttpMethod.GET, "/api/usuarios/login").authenticated();
                     auth.requestMatchers(HttpMethod.GET, "/api/grupos").hasAnyAuthority("A-Gr", "M-Gr", "R-Gr", "ADMIN");
                     auth.requestMatchers(HttpMethod.POST, "/api/grupos").hasAnyAuthority("A-Gr", "ADMIN");
                     auth.requestMatchers(HttpMethod.PATCH, "/api/grupos").hasAnyAuthority("M-Gr", "ADMIN");
-                    auth.requestMatchers(HttpMethod.DELETE, "/api/grupos").hasAnyAuthority("R-Gr", "ADMIN");
+                    auth.requestMatchers(HttpMethod.DELETE, "/api/grupos/{id}").hasAnyAuthority("R-Gr", "ADMIN");
+                    auth.requestMatchers(HttpMethod.GET, "/api/grupos/enlistar").hasAnyAuthority("M-Gr", "ADMIN");
+                    auth.requestMatchers(HttpMethod.GET, "/api/permisos/enlistar").hasAnyAuthority("M-Gr", "ADMIN");
                     auth.requestMatchers(HttpMethod.POST, "/api/reporte/**").hasAnyAuthority("DISTRIBUIDORAS", "EMPLEADO", "ADMIN");
                     auth.requestMatchers(HttpMethod.POST, "/api/cotizaciones/aceptar/{idCotizacion}").hasAuthority("PERSONA FISICA");
                     auth.requestMatchers(HttpMethod.POST, "/api/cotizaciones/rechazar/{idCotizacion}").hasAuthority("PERSONA FISICA");
@@ -80,7 +83,6 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.GET, "/api/cotizaciones/enlistar/{IdPresupuesto}").hasAnyAuthority("PERSONA FISICA", "Y-Pr", "ADMIN");
                     auth.requestMatchers(HttpMethod.POST, "/api/cotizaciones/{idPresupuesto}").hasAuthority("DISTRIBUIDORAS");
                     auth.requestMatchers(HttpMethod.GET, "/api/categorias/por-distribuidora").hasAnyAuthority("Z-Pr", "DISTRIBUIDORAS");
-//                    auth.anyRequest().authenticated();/detalles/{id}/enlistar
                 })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth2 -> {
