@@ -7,7 +7,7 @@ import java.util.List;
 
 public class GrupoSpecs {
     public static Specification<Grupo> filtrarGruposProhibidos() {
-        List<String> nombresProhibidos = List.of("ADMIN", "PERSONA FISICA", "DISTRIBUIDORAS", "EMPLEADOS");
+        List<String> nombresProhibidos = List.of("ADMIN", "PERSONA FISICA", "DISTRIBUIDORAS", "EMPLEADO");
         return (root, query, builder) -> root.get("nombre").in(nombresProhibidos).not();
     }
 }
