@@ -15,12 +15,10 @@ import java.util.Date;
 @RequiredArgsConstructor @AllArgsConstructor
 public class TrazabilidadPersonaFisicaDto {
     @Id
-    private String cuit;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "cuit")
-    private Usuario usuario;
+    private String cuit;
 
     private String nombre;
     private String numeroTelefono;
