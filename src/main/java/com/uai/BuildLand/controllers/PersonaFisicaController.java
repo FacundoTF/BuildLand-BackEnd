@@ -1,8 +1,10 @@
 package com.uai.BuildLand.controllers;
 
 import com.uai.BuildLand.config.PasswordEncoder;
+import com.uai.BuildLand.models.dto.TrazabilidadPersonaFisicaDto;
 import com.uai.BuildLand.models.presupuesto.Presupuesto;
 import com.uai.BuildLand.repositories.PresupuestoRepository;
+import com.uai.BuildLand.repositories.TrazPersonaFisica;
 import com.uai.BuildLand.repositories.UsuarioRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,13 +34,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class PersonaFisicaController {
     private final PersonaFisicaRepository personaFisicaRepository;
     private final PresupuestoRepository presupuestoRepository;
+    private final TrazPersonaFisica trazabilidadPersonaFisicaRepository;
     private final UsuarioRepository usuarioRepository;
 
 
-    public PersonaFisicaController(PersonaFisicaRepository personaFisicaRepository, PresupuestoRepository presupuestoRepository, UsuarioRepository usuarioRepository) {
+    public PersonaFisicaController(TrazPersonaFisica trazPersonaFisica, PersonaFisicaRepository personaFisicaRepository, PresupuestoRepository presupuestoRepository, UsuarioRepository usuarioRepository) {
         this.usuarioRepository = usuarioRepository;
         this.presupuestoRepository = presupuestoRepository;
         this.personaFisicaRepository = personaFisicaRepository;
+        this.trazabilidadPersonaFisicaRepository = trazPersonaFisica;
     }
 
     /**
@@ -118,6 +122,20 @@ public class PersonaFisicaController {
 
         PersonaFisica personaGuardada = personaFisicaRepository.save(personaAGuardar);
 
+        trazabilidadPersonaFisicaRepository.save(new TrazabilidadPersonaFisicaDto(
+                null,
+                personaGuardada.getUsuario().getCuit(),
+                personaGuardada.getNombre(),
+                personaGuardada.getNumeroTelefono(),
+                personaGuardada.getCodigoPostal(),
+                personaGuardada.getCiudad(),
+                personaGuardada.getUsuario().getEmail(),
+                personaGuardada.getUsuario().getPassword(),
+                personaGuardada.getUsuario().getEstado(),
+                TrazabilidadPersonaFisicaDto.TipoAccion.REGISTRO,
+                new java.util.Date()
+        ));
+
         URI uri = ucb.path("api/personas-fisicas/{cuit}").buildAndExpand(personaGuardada.getCuit()).toUri();
         return ResponseEntity.created(uri).body(personaGuardada);
     }
@@ -132,6 +150,10 @@ public class PersonaFisicaController {
         }
 
         PersonaFisica personaFisicaExistente = personaFisicaExistenteOpt.get();
+
+        if (personaFisicaExistente.hashCode() == personaFisica.hashCode()) {
+            return ResponseEntity.ok(personaFisicaExistente);
+        }
 
         // Actualizar solo los campos de PersonaFisica sin tocar el Usuario
         if (personaFisica.getNombre() != null) {
@@ -162,15 +184,24 @@ public class PersonaFisicaController {
         }
 
         PersonaFisica personaActualizada = personaFisicaRepository.save(personaFisicaExistente);
+
+        trazabilidadPersonaFisicaRepository.save(new TrazabilidadPersonaFisicaDto(
+                null,
+                personaActualizada.getUsuario().getCuit(),
+                personaActualizada.getNombre(),
+                personaActualizada.getNumeroTelefono(),
+                personaActualizada.getCodigoPostal(),
+                personaActualizada.getCiudad(),
+                personaActualizada.getUsuario().getEmail(),
+                personaActualizada.getUsuario().getPassword(),
+                personaActualizada.getUsuario().getEstado(),
+                TrazabilidadPersonaFisicaDto.TipoAccion.MODIFICACION,
+                new java.util.Date()
+        ));
+
         return ResponseEntity.ok(personaActualizada);
     }
 
-    /**
-     * Elimina una persona física por CUIT
-     * 
-     * @param cuit CUIT de la persona física a eliminar
-     * @return 204 si se eliminó correctamente, 404 si no existía
-     */
     @DeleteMapping("/{cuit}")
     public ResponseEntity<Void> eliminar(@PathVariable String cuit) {
         // Ensure cuit is non-null for repositories that expect @NonNull parameters
@@ -190,6 +221,21 @@ public class PersonaFisicaController {
             personaFisicaRepository.deleteById(nonNullCuit);
             Optional<Usuario> usuario = usuarioRepository.findByEmail(persona.getUsuario().getEmail());
             usuario.ifPresent(value -> usuarioRepository.deleteById(value.getCuit()));
+
+            trazabilidadPersonaFisicaRepository.save(new TrazabilidadPersonaFisicaDto(
+                    null,
+                    persona.getUsuario().getCuit(),
+                    persona.getNombre(),
+                    persona.getNumeroTelefono(),
+                    persona.getCodigoPostal(),
+                    persona.getCiudad(),
+                    persona.getUsuario().getEmail(),
+                    persona.getUsuario().getPassword(),
+                    persona.getUsuario().getEstado(),
+                    TrazabilidadPersonaFisicaDto.TipoAccion.ELIMINACION,
+                    new java.util.Date()
+            ));
+
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

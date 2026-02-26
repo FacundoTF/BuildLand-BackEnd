@@ -9,6 +9,7 @@ import com.uai.BuildLand.models.access.ConjuntoGrupoPermiso;
 import com.uai.BuildLand.models.access.Grupo;
 import com.uai.BuildLand.models.cotizacion.Cotizacion;
 import com.uai.BuildLand.models.dto.TipoUsuarioDatosDto;
+import com.uai.BuildLand.models.dto.TrazabilidadPersonaFisicaDto;
 import com.uai.BuildLand.models.dto.VerificationCodeDto;
 import com.uai.BuildLand.models.presupuesto.Presupuesto;
 import com.uai.BuildLand.repositories.*;
@@ -43,6 +44,7 @@ public class UsuarioController {
     private final EmpleadoRepository eRepository;
     private final PresupuestoRepository prRepository;
     private final CotizacionRepository ctRepository;
+    private final TrazPersonaFisica traPersonaFisicaRepository;
 
     public UsuarioController(
             UsuarioRepository usuarioRepository,
@@ -51,7 +53,8 @@ public class UsuarioController {
             DistribuidoraRepository dRepository,
             EmpleadoRepository eRepository,
             PresupuestoRepository prRepository,
-            CotizacionRepository ctRepository
+            CotizacionRepository ctRepository,
+            TrazPersonaFisica traPersonaFisicaRepository
     ) {
         this.pfRepository = pfRepository;
         this.dRepository = dRepository;
@@ -60,6 +63,7 @@ public class UsuarioController {
         this.usuarioRepository = usuarioRepository;
         this.prRepository = prRepository;
         this.ctRepository = ctRepository;
+        this.traPersonaFisicaRepository = traPersonaFisicaRepository;
 
     }
 
@@ -253,6 +257,21 @@ public class UsuarioController {
                         dto.getCiudad()
                 );
                 pfRepository.save(personaFisica);
+
+                traPersonaFisicaRepository.save(new TrazabilidadPersonaFisicaDto(
+                        null,
+                        personaFisica.getUsuario().getCuit(),
+                        personaFisica.getNombre(),
+                        personaFisica.getNumeroTelefono(),
+                        personaFisica.getCodigoPostal(),
+                        personaFisica.getCiudad(),
+                        personaFisica.getUsuario().getEmail(),
+                        personaFisica.getUsuario().getPassword(),
+                        personaFisica.getUsuario().getEstado(),
+                        TrazabilidadPersonaFisicaDto.TipoAccion.REGISTRO,
+                        new java.util.Date()
+                ));
+
                 URI uri = ucb.path("/usuarios/{cuit}").buildAndExpand(usuarioGuardado.getCuit()).toUri();
                 return ResponseEntity.created(uri).body(personaFisica);
             }
@@ -355,6 +374,21 @@ public class UsuarioController {
                     personaFisica.setCiudad(dto.getCiudad());
                     personaFisica.setCodigoPostal(dto.getCodigoPostal());
                     usuarioRol = pfRepository.save(personaFisica);
+
+                    traPersonaFisicaRepository.save(new TrazabilidadPersonaFisicaDto(
+                            null,
+                            personaFisica.getUsuario().getCuit(),
+                            personaFisica.getNombre(),
+                            personaFisica.getNumeroTelefono(),
+                            personaFisica.getCodigoPostal(),
+                            personaFisica.getCiudad(),
+                            personaFisica.getUsuario().getEmail(),
+                            personaFisica.getUsuario().getPassword(),
+                            personaFisica.getUsuario().getEstado(),
+                            TrazabilidadPersonaFisicaDto.TipoAccion.MODIFICACION,
+                            new java.util.Date()
+                    ));
+
                 }
             }
             usuarioRepository.save(dto.getUsuario());
@@ -372,6 +406,22 @@ public class UsuarioController {
             if (usuario.getEmail().equals(dto.getEmail())) {
                 usuario.setPassword(PasswordEncoder.encode((dto.getCode())));
                 usuarioRepository.save(usuario);
+                if (usuario.getTipoUsuario() == Usuario.TipoUsuario.PERSONA_FISICA){
+                    PersonaFisica personaFisica = pfRepository.findByUsuario(usuario);
+                    traPersonaFisicaRepository.save(new TrazabilidadPersonaFisicaDto(
+                            null,
+                            personaFisica.getUsuario().getCuit(),
+                            personaFisica.getNombre(),
+                            personaFisica.getNumeroTelefono(),
+                            personaFisica.getCodigoPostal(),
+                            personaFisica.getCiudad(),
+                            personaFisica.getUsuario().getEmail(),
+                            personaFisica.getUsuario().getPassword(),
+                            personaFisica.getUsuario().getEstado(),
+                            TrazabilidadPersonaFisicaDto.TipoAccion.MODIFICACION,
+                            new java.util.Date()
+                    ));
+                }
                 return ResponseEntity.ok().build();
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -414,6 +464,21 @@ public class UsuarioController {
                     prRepository.saveAll(presupuestos);
 
                     pfRepository.delete(personaFisica);
+
+                    traPersonaFisicaRepository.save(new TrazabilidadPersonaFisicaDto(
+                            null,
+                            personaFisica.getUsuario().getCuit(),
+                            personaFisica.getNombre(),
+                            personaFisica.getNumeroTelefono(),
+                            personaFisica.getCodigoPostal(),
+                            personaFisica.getCiudad(),
+                            personaFisica.getUsuario().getEmail(),
+                            personaFisica.getUsuario().getPassword(),
+                            personaFisica.getUsuario().getEstado(),
+                            TrazabilidadPersonaFisicaDto.TipoAccion.ELIMINACION,
+                            new java.util.Date()
+                    ));
+
                 }
             }
             usuarioRepository.eliminarConjuntoGrupoPermiso(nonNullCuit);
