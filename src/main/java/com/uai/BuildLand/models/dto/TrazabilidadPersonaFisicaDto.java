@@ -31,6 +31,7 @@ public class TrazabilidadPersonaFisicaDto {
     private String password;
     private boolean estado;
 
+    @Enumerated(EnumType.STRING)
     private TipoAccion accion;
     private Date fechaAccion;
 

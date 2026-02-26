@@ -23,9 +23,12 @@ public class TrazabilidadLoginDto {
     private Usuario usuario;
 
     private String nombreUsuario;
+    @Enumerated(EnumType.STRING)
     private Usuario.TipoUsuario tipoUsuario;
 
     private Date fecha;
+
+    @Enumerated(EnumType.STRING)
     private AccionUsuario accion;
 
     public enum AccionUsuario {
