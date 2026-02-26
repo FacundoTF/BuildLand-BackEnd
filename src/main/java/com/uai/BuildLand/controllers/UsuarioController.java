@@ -211,6 +211,10 @@ public class UsuarioController {
         if (userObtenido.getPassword() == null || userObtenido.getPassword().trim().isEmpty() || userObtenido.getPassword().length() > 255) {
             return ResponseEntity.badRequest().build();
         }
+        String rawPassword = userObtenido.getPassword();
+        String encodedPassword = PasswordEncoder.encode(rawPassword);
+        userObtenido.setPassword(encodedPassword);
+
         Usuario usuarioGuardado = usuarioRepository.save(userObtenido);
         if (usuarioGuardado.getCuit().isEmpty() || usuarioGuardado.getCuit().isBlank()){
             return ResponseEntity.badRequest().build();
