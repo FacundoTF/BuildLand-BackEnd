@@ -5,10 +5,13 @@ import com.uai.BuildLand.models.auth.AuthRequest;
 import com.uai.BuildLand.models.auth.Usuario;
 import com.uai.BuildLand.models.dto.AuthResponseDto;
 import com.uai.BuildLand.models.dto.AuthUserInfoDto;
+import com.uai.BuildLand.models.dto.TrazabilidadLoginDto;
 import com.uai.BuildLand.models.dto.VerificationCodeDto;
+import com.uai.BuildLand.repositories.TrazLogin;
 import com.uai.BuildLand.repositories.UsuarioRepository;
 import com.uai.BuildLand.services.AuthService;
 import com.uai.BuildLand.services.EmailService;
+import com.uai.BuildLand.services.JwtTokenService;
 import com.uai.BuildLand.services.VerificationCodeService;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.http.SameSiteCookies;
@@ -29,7 +32,9 @@ public class AuthController {
     private final AuthService authService;
     private final EmailService emailService;
     private final VerificationCodeService verificationCodeService;
+    private final TrazLogin trazLogin;
     private final UsuarioRepository usuarioRepository;
+    private final JwtTokenService jwtTokenService;
 
     @PostMapping("/token")
     public ResponseEntity<AuthResponseDto> login(@RequestBody AuthRequest authRequest) {
@@ -68,6 +73,15 @@ public class AuthController {
                 .build();
 
         AuthResponseDto responseBody = new AuthResponseDto(authUserInfo.getAuthResponse().getUsername(), authUserInfo.getGrupos(), authUserInfo.getPermisos());
+
+        trazLogin.save(new TrazabilidadLoginDto(
+                null,
+                usuarioReal.getCuit(),
+                usuarioReal.getEmail(),
+                usuarioReal.getTipoUsuario(),
+                new java.util.Date(),
+                TrazabilidadLoginDto.AccionUsuario.LOGIN
+        ));
 
         return ResponseEntity.status(200).header(HttpHeaders.SET_COOKIE, cookie.toString()).header(HttpHeaders.SET_COOKIE, refreshCookie.toString()).body(responseBody);
     }
@@ -140,7 +154,18 @@ public class AuthController {
     }
 
     @PostMapping("logout")
-    public ResponseEntity<AuthResponseDto> logout() {
+    public ResponseEntity<AuthResponseDto> logout(@CookieValue (value = "accessToken") String accessToken) {
+
+        String correo = jwtTokenService.extractUsername(accessToken);
+
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(correo);
+
+        if (usuarioOpt.isEmpty()){
+            return ResponseEntity.status(404).build();
+        }
+
+        Usuario usuarioReal = usuarioOpt.get();
+
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(false)
                 .path("/")
@@ -156,6 +181,15 @@ public class AuthController {
                 .maxAge(0)
                 .sameSite(SameSiteCookies.STRICT.toString())
                 .build();
+
+        trazLogin.save(new TrazabilidadLoginDto(
+                null,
+                usuarioReal.getCuit(),
+                usuarioReal.getEmail(),
+                usuarioReal.getTipoUsuario(),
+                new java.util.Date(),
+                TrazabilidadLoginDto.AccionUsuario.LOGOUT
+        ));
 
         return ResponseEntity.status(200).header(HttpHeaders.SET_COOKIE, refreshCookie.toString()).header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
     }
