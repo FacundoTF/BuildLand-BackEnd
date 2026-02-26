@@ -77,6 +77,8 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.GET, "/api/grupos/enlistar").hasAnyAuthority("M-Gr", "ADMIN");
                     auth.requestMatchers(HttpMethod.GET, "/api/permisos/enlistar").hasAnyAuthority("M-Gr", "ADMIN");
                     auth.requestMatchers(HttpMethod.POST, "/api/reporte/**").hasAnyAuthority("DISTRIBUIDORAS", "EMPLEADO", "ADMIN");
+                    auth.requestMatchers(HttpMethod.GET, "/api/reporte/trazabilidad-login-logout/{cuit}").hasAnyAuthority("ADMIN", "T-X");
+                    auth.requestMatchers(HttpMethod.GET, "/api/reporte/trazabilidad-distribuidora/{cuit}").hasAnyAuthority("ADMIN", "D-X");
                     auth.requestMatchers(HttpMethod.POST, "/api/cotizaciones/aceptar/{idCotizacion}").hasAuthority("PERSONA FISICA");
                     auth.requestMatchers(HttpMethod.POST, "/api/cotizaciones/rechazar/{idCotizacion}").hasAuthority("PERSONA FISICA");
                     auth.requestMatchers(HttpMethod.GET, "/api/cotizaciones/mensajes-rechazo").hasAuthority("PERSONA FISICA");
