@@ -76,9 +76,15 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.DELETE, "/api/grupos/{id}").hasAnyAuthority("R-Gr", "ADMIN");
                     auth.requestMatchers(HttpMethod.GET, "/api/grupos/enlistar").hasAnyAuthority("M-Gr", "ADMIN");
                     auth.requestMatchers(HttpMethod.GET, "/api/permisos/enlistar").hasAnyAuthority("M-Gr", "ADMIN");
-                    auth.requestMatchers(HttpMethod.POST, "/api/reporte/**").hasAnyAuthority("DISTRIBUIDORAS", "EMPLEADO", "ADMIN");
+                    auth.requestMatchers(HttpMethod.POST, "/api/reporte/cotizaciones-ganadas-perdidas").hasAnyAuthority("DISTRIBUIDORAS", "C-X");
+                    auth.requestMatchers(HttpMethod.POST, "/api/reporte/cotizaciones-rechazadas-mensajes").hasAnyAuthority("DISTRIBUIDORAS", "C-X");
+                    auth.requestMatchers(HttpMethod.POST, "/api/reporte/cotizaciones-rechazadas-mensajes-general").hasAnyAuthority("DISTRIBUIDORAS", "C-X");
+                    auth.requestMatchers(HttpMethod.POST, "/api/reporte/cotizaciones-rechazadas-mensajes-general").hasAnyAuthority("DISTRIBUIDORAS", "C-X");
+                    auth.requestMatchers(HttpMethod.POST, "/api/reporte/productos-solicitados").hasAnyAuthority("DISTRIBUIDORAS", "P-X");
+                    auth.requestMatchers(HttpMethod.POST, "/api/reporte/productos-solicitados/producto").hasAnyAuthority("DISTRIBUIDORAS", "P-X");
+                    auth.requestMatchers(HttpMethod.POST, "/api/reporte/productos-solicitados/marca").hasAnyAuthority("DISTRIBUIDORAS", "P-X");
                     auth.requestMatchers(HttpMethod.GET, "/api/reporte/trazabilidad-login-logout/{cuit}").hasAnyAuthority("ADMIN", "T-X");
-                    auth.requestMatchers(HttpMethod.GET, "/api/reporte/trazabilidad-distribuidora/{cuit}").hasAnyAuthority("ADMIN", "D-X");
+                    auth.requestMatchers(HttpMethod.GET, "/api/reporte/trazabilidad-persona-fisica/{cuit}").hasAnyAuthority("ADMIN", "A-X");
                     auth.requestMatchers(HttpMethod.POST, "/api/cotizaciones/aceptar/{idCotizacion}").hasAuthority("PERSONA FISICA");
                     auth.requestMatchers(HttpMethod.POST, "/api/cotizaciones/rechazar/{idCotizacion}").hasAuthority("PERSONA FISICA");
                     auth.requestMatchers(HttpMethod.GET, "/api/cotizaciones/mensajes-rechazo").hasAuthority("PERSONA FISICA");
