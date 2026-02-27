@@ -1,15 +1,23 @@
 package com.uai.BuildLand.controllers;
 
+import com.uai.BuildLand.config.PasswordEncoder;
 import com.uai.BuildLand.models.Distribuidora;
+import com.uai.BuildLand.models.dto.PaginationResultDto;
+import com.uai.BuildLand.models.dto.TrazabilidadLoginDto;
+import com.uai.BuildLand.models.dto.TrazabilidadPersonaFisicaDto;
 import com.uai.BuildLand.models.reporte.mensajesRechazoCotizacion.ReporteRechazoCotizacionDatos;
 import com.uai.BuildLand.models.reporte.productosSolicitados.ReporteProductosSolicitados;
 import com.uai.BuildLand.models.reporte.productosSolicitados.ReporteProductosSolicitadosDatos;
 import com.uai.BuildLand.models.reporte.productosSolicitados.ReporteProductosSolicitadosEspecifico;
-import com.uai.BuildLand.repositories.CotizacionRepository;
-import com.uai.BuildLand.repositories.DistribuidoraRepository;
-import com.uai.BuildLand.repositories.PresupuestoRepository;
+import com.uai.BuildLand.repositories.*;
 import com.uai.BuildLand.services.JwtTokenService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +34,8 @@ public class ReporteController {
     private final PresupuestoRepository presupuestoRepository;
     private final CotizacionRepository cotizacionRepository;
     private final DistribuidoraRepository distribuidoraRepository;
+    private final TrazLogin trazLoginRepository;
+    private final TrazPersonaFisica trazPersonaFisicaRepository;
     private final JwtTokenService jwtTokenService;
 
     @PostMapping("/productos-solicitados")
@@ -178,5 +188,46 @@ public class ReporteController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+    @GetMapping("/trazabilidad-persona-fisica/{cuit}")
+    public PaginationResultDto reportarTrazabilidadPersonaFisica(@PathVariable String cuit, Pageable pageable, @Param(value = "pagina") Integer pagina) {
+        try{
+            String cuitNoNulo = Optional.ofNullable(cuit).orElseThrow(() -> new IllegalArgumentException("El CUIT no puede ser nulo"));
+             if (cuitNoNulo.isEmpty()) {
+                throw new IllegalArgumentException("El CUIT no puede estar vacío");
+            }
+            Specification<TrazabilidadPersonaFisicaDto> spec = (root, query, builder) -> builder.equal(root.get("cuit"), cuitNoNulo);
+
+            Page<TrazabilidadPersonaFisicaDto> page = trazPersonaFisicaRepository.findAll(spec, PageRequest.of(
+                    pagina,
+                    5,
+                    pageable.getSortOr(Sort.by(Sort.Direction.DESC, "fechaAccion"))
+            ));
+
+            return new PaginationResultDto(page.getContent(), page.hasPrevious(), page.hasNext());
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+    @GetMapping("/trazabilidad-login-logout/{cuit}")
+    public PaginationResultDto reportarTrazabilidadLoginLogout(@PathVariable String cuit, Pageable pageable, @Param(value = "pagina") Integer pagina) {
+        try {
+            String cuitNoNulo = Optional.ofNullable(cuit).orElseThrow(() -> new IllegalArgumentException("El CUIT no puede ser nulo"));
+            if (cuitNoNulo.isEmpty()) {
+                throw new IllegalArgumentException("El CUIT no puede estar vacío");
+            }
+            Specification<TrazabilidadLoginDto> spec = (root, query, builder) -> builder.equal(root.get("cuit"), cuitNoNulo);
+
+            Page<TrazabilidadLoginDto> page = trazLoginRepository.findAll(spec, PageRequest.of(
+                    pagina,
+                    5,
+                    pageable.getSortOr(Sort.by(Sort.Direction.DESC, "fecha"))
+            ));
+            return new PaginationResultDto(page.getContent(), page.hasPrevious(), page.hasNext());
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 }
