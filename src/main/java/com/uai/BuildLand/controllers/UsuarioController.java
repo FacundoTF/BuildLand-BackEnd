@@ -410,22 +410,6 @@ public class UsuarioController {
             if (usuario.getEmail().equals(dto.getEmail())) {
                 usuario.setPassword(PasswordEncoder.encode((dto.getCode())));
                 usuarioRepository.save(usuario);
-                if (usuario.getTipoUsuario() == Usuario.TipoUsuario.PERSONA_FISICA){
-                    PersonaFisica personaFisica = pfRepository.findByUsuario(usuario);
-                    traPersonaFisicaRepository.save(new TrazabilidadPersonaFisicaDto(
-                            null,
-                            personaFisica.getUsuario().getCuit(),
-                            personaFisica.getNombre(),
-                            personaFisica.getNumeroTelefono(),
-                            personaFisica.getCodigoPostal(),
-                            personaFisica.getCiudad(),
-                            personaFisica.getUsuario().getEmail(),
-                            personaFisica.getUsuario().getPassword(),
-                            personaFisica.getUsuario().getEstado(),
-                            TrazabilidadPersonaFisicaDto.TipoAccion.MODIFICACION,
-                            new java.util.Date()
-                    ));
-                }
                 return ResponseEntity.ok().build();
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
